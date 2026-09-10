@@ -14,10 +14,6 @@
 
 更深的论述见 [`docs/philosophy.md`](docs/philosophy.md)。
 
-## 致谢
-
-设计骨架来自 [obra/superpowers](https://github.com/obra/superpowers);7 个 Godot 知识技能搬运自 [godot-mcp-connector](https://github.com/Fromlan/godot-mcp-connector)。详细迁移对照见 [`docs/migration-from-superpowers.md`](docs/migration-from-superpowers.md)。
-
 ## 包含什么
 
 **19 个技能** 分两类:
@@ -92,3 +88,7 @@ git clone https://github.com/Fromlan/godot-2d-superpowers.git
 ## 许可
 
 MIT(本仓库新增内容);godot-mcp-connector 搬运部分保留其原始许可。
+
+## 致谢
+
+设计骨架来自 [obra/superpowers](https://github.com/obra/superpowers);7 个 Godot 知识技能搬运自 [godot-mcp-connector](https://github.com/Fromlan/godot-mcp-connector)。详细迁移对照见 [`docs/migration-from-superpowers.md`](docs/migration-from-superpowers.md)。
