@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3 uid="uid://b1main000001"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://b1player00001" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://b1hud0000001" path="res://scenes/hud.tscn" id="3_hud"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="Ground" type="StaticBody2D" parent="World"]
+position = Vector2(640, 660)
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Ground"]
+shape = SubResource("RectangleShape2D_ground")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
+size = Vector2(1200, 80)
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(200, 500)
+collision_layer = 1
+
+[node name="HUD" parent="." instance=ExtResource("3_hud")]

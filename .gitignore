@@ -1,0 +1,24 @@
+# Godot
+.godot/
+.import/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build
+*.tmp
+*.bak
+build/
+exports/
+addons/*/.import
+
+# Local override
+*.local

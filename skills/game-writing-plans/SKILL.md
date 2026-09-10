@@ -1,0 +1,155 @@
+---
+name: game-writing-plans
+description: Use when GDD is approved and user wants to start implementation, or says "写计划" / "拆任务" / "开始开发". Godot 2D specific: 5-15 minute task granularity, explicit scene/script/asset categorization per task, includes subagent dispatch rules.
+last_reviewed: 2026-09-10
+---
+
+<!-- argument-hint: [from-gdd | from-feature | from-bug] -->
+
+# Game Writing Plans (2D Godot)
+
+> 把 GDD / 功能需求拆成可执行的小任务,每个任务 5-15 分钟。
+> 走完本技能,产出 `plans/<plan-name>.md`,可直接喂给 `godot-coding-2d` 执行。
+
+## 0. 路由(单题)
+
+| 选项 | 含义 | 主走 |
+|last_reviewed: 2026-09-10
+------|------|------|
+| **A. 从 GDD 拆** | GDD 已批准,从头拆实现 | 走完整流程 |
+| **B. 加新功能** | 已有项目,加一个 feature | 走精简版,只拆该 feature |
+| **C. 修一批 bug** | `systematic-debugging-2d` 出的多个根因 | 走精简版,按根因拆 |
+
+## 1. 计划结构(强制模板)
+
+写到 `plans/<feature-name>.md`:
+
+```markdown
+# 计划: <feature-name>
+
+## 元数据
+- 来源: <GDD 路径 / 需求描述>
+- 目标: <一句话目标>
+- 风险: <技术/设计/资产风险>
+- 涉及类型: [ ] 脚本 [ ] 场景 [ ] 资源 [ ] 插件
+
+## 依赖(必须先完成的)
+- [ ] <任务名>(<预计分钟数>m)
+
+## 任务列表
+
+### T1. <任务名>(<预计分钟数>m)
+**类型**: 脚本 / 场景 / 资源 / 插件
+**文件**:
+  - 新建: `scripts/foo.gd`
+  - 改: `scenes/main.tscn`(节点 X 挂脚本 Y)
+**前置**: T0
+**步骤**:
+1. 写 `scripts/foo.gd`,内容:
+   ```gdscript
+   # 完整代码
+   ```
+2. 在 `scenes/main.tscn` 添加节点 Foo
+**验证**:
+- [ ] `scripts/run-tests.ps1` 通过
+- [ ] `godot --headless` 启动主场景无错
+- [ ] 手测: <具体操作>
+**提交**: `git add -A && git commit -m "T1: <任务名>"`
+
+### T2. ...
+
+## 验收
+- [ ] 所有任务完成
+- [ ] `scripts/run-tests.ps1` 通过
+- [ ] 手测 <核心场景>
+- [ ] `game-code-review` 走一遍
+```
+
+## 2. 任务粒度(关键约束)
+
+**5-15 分钟** 是硬性要求,不能"想"出来,要**估出来**。
+
+| 类型 | 粒度参考 |
+|------|----------|
+| 写一个 GDScript 工具函数 | 5 分钟 |
+| 写一个 Resource 类 + 编辑器 | 8-10 分钟 |
+| 写一个 CharacterBody2D 移动 | 10-15 分钟 |
+| 写一个状态机(3 状态) | 10 分钟 |
+| 装配一个 UI 场景 | 10-15 分钟 |
+| 接入一个新资源(图片+导入) | 5-8 分钟 |
+| 配置导出预设 | 8 分钟 |
+
+**超过 15 分钟的任务** → 必须再拆。
+
+## 3. 任务类型标签(强制)
+
+每条任务必须标 **类型**:
+
+| 类型 | 含义 | 验收方式 |
+|------|------|----------|
+| **脚本** | 只改 `.gd` | GUT 单测 + headless 启动 |
+| **场景** | 改 `.tscn` | headless 启动 + 手测 |
+| **资源** | 改 `.tres` / `.import` / 美术 | GDScript 校验 + 视觉确认 |
+| **插件** | 改 `addons/` 或 `project.godot` | 启动 + 插件测试 |
+
+原因:**类型不同,并行可行性不同**:
+- 多个脚本任务可并行(子代理不同文件)
+- 多个场景任务通常**串行**(场景树耦合)
+- 资源 + 脚本可并行
+- 改 `project.godot` 必须串行独占
+
+## 4. 文件影响清单(每条任务必填)
+
+每条任务的 **文件** 部分要列清:
+- **新建** 文件:绝对路径
+- **改** 哪些文件:具体改什么(节点 / 函数 / 信号)
+- 改 `.tscn` 必须写出节点路径(避免子代理乱改)
+
+## 5. 子代理派发规则
+
+写到计划时就要想清楚:
+- 哪些任务可并行? `<- parallel`
+- 哪些必须串行? `<- sequential`
+- 哪些需要 `game-code-review` 介入? `<- review`
+
+模板:
+```markdown
+### T3. 写敌人 AI(12m) <- parallel
+### T4. 写道具系统(10m) <- parallel
+### T5. 接入 AI 到关卡(8m) <- sequential,depends T3
+### T6. review 一批(15m) <- review,depends T3 T4 T5
+```
+
+## 6. 验证步骤(每条任务必填)
+
+每条任务**必须**有可机器执行的验证:
+- `scripts/run-tests.ps1` 通过
+- `godot --headless --quit` 无错
+- 手测步骤(具体操作)
+- (可选)性能基线: `Engine.get_frames_per_second() > 55`
+
+**禁止**用 "代码看起来对" / "应该可以" 这种模糊验证。
+
+## 7. 提交策略
+
+每条任务完成 = 1 个 commit。commit message 模板:
+```
+T<id>: <任务名>
+
+- 文件:
+- 验证:
+```
+
+## 8. 反模式
+
+- ❌ "实现玩家系统" 一条任务 60 分钟 → 必须拆
+- ❌ 没写"前置"任务 → 子代理不知道要等什么
+- ❌ 验证只写"测试" → 必须具体到跑哪条
+- ❌ 任务里没写"类型" → 无法决定并行还是串行
+- ❌ 把"改场景树"和"改 GDScript"混在一条 → 拆开
+
+## 9. 衔接
+
+- 计划完成 → `godot-coding-2d` 逐任务执行
+- 执行过程用 git worktree 隔离
+- 每批任务完成 → `game-code-review`
