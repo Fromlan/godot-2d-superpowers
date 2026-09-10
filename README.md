@@ -14,25 +14,9 @@
 
 更深的论述见 [`docs/philosophy.md`](docs/philosophy.md)。
 
-## 设计参考与致谢
+## 致谢
 
-本套件的骨架来自 [obra/superpowers](https://github.com/obra/superpowers)——一个面向 Claude Code 的通用技能框架。我们沿用了它的核心模式:**调度入口 + 决策表 + Red-Flags 表 + 计划拆任务 + 测试驱动 + 系统化调试 + 代码审查 + 分支收尾**。同时做了**大幅重塑**以贴合 2D Godot:
-
-| 来自 superpowers | 本套件 | 差异 |
-|------------------|--------|------|
-| `using-superpowers` | `using-game-dev` | 决策表加上 2D Godot 专有场景 |
-| `brainstorming` | `game-brainstorming` | 加上 2D 类型 hook / 核心循环强调 |
-| `writing-plans` | `game-writing-plans` | 任务粒度 5-15m、加类型标签、子代理派发规则 |
-| `test-driven-development` | `godot-coding-2d`(含分层测试) | 改"全栈 TDD"为分层 |
-| `systematic-debugging` | `systematic-debugging-2d` | 加 2D 物理 / 动画 / 渲染专项 |
-| `requesting-code-review` | `game-code-review` | 加 Godot 反模式清单 |
-| `finishing-a-development-branch` | (同名) | 直接复用 |
-
-本套件**新增**(superpowers 没有的):GDD、原型循环、关卡数据流、资源管线、release checklist、`verify-godot-claims`,以及 7 个 2D Godot 知识技能。
-
-知识技能(`godot-docs-4-7` + 7 个 `godot-*`)搬运自 [godot-mcp-connector](https://github.com/Fromlan/godot-mcp-connector)。
-
-完整迁移对照见 [`docs/migration-from-superpowers.md`](docs/migration-from-superpowers.md)。
+设计骨架来自 [obra/superpowers](https://github.com/obra/superpowers);7 个 Godot 知识技能搬运自 [godot-mcp-connector](https://github.com/Fromlan/godot-mcp-connector)。详细迁移对照见 [`docs/migration-from-superpowers.md`](docs/migration-from-superpowers.md)。
 
 ## 包含什么
 
