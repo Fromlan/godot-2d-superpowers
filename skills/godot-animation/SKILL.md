@@ -1,7 +1,7 @@
 ---
 name: godot-animation
 description: |
-  Godot 4.7 动画 / Tween / AnimationPlayer / AnimationTree / StateMachine / AnimatedSprite2D / 何时用哪种。Use when the user mentions "Godot 动画"、"Tween"、"AnimationPlayer"、"AnimationTree"、"StateMachine"、"精灵动画"、"攻击动画"、"过渡"、"缓动"、"ease"、"动画状态机"、"keyframe". Do NOT use for one-off UI hover (see godot-ui-best-practices) or visual feedback that should already be tween-based. Read-only knowledge.
+  Godot 4.7 动画:Tween、AnimationPlayer、AnimationTree/StateMachine、AnimatedSprite2D 选型与生命周期。Use when 提到"Tween"、"AnimationPlayer"、"StateMachine"、"精灵动画"、"缓动"、"动画状态机"。Do NOT use for 一次性 UI hover(见 godot-ui-best-practices)。Read-only knowledge。
 last_reviewed: 2026-09-10
 ---
 

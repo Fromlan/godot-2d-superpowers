@@ -4,6 +4,8 @@ description: Use when starting any conversation on a 2D Godot project — establ
 last_reviewed: 2026-09-10
 ---
 
+<!-- argument-hint: none (this skill is the dispatcher; pick a skill from the decision table) -->
+
 <EXTREMELY-IMPORTANT>
 If you think there is even a 1% chance a skill might apply to what you are doing, you ABSOLUTELY MUST invoke the skill.
 

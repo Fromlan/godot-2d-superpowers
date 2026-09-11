@@ -1,6 +1,7 @@
 ---
 name: godot-docs-4-7
 description: "Godot 4.7 conventions and API patterns. Use when asking about Godot/GDScript, scene composition, signals, CharacterBody vs RigidBody, InputMap, @export/@onready/@rpc, Forward+/GI, AnimationTree/Tween, shaders, multiplayer, or export/plugin."
+last_reviewed: 2026-09-10
 ---
 
 <!-- argument-hint: [topic, framework name, or chapter number, e.g. 'signal', '@rpc', 'CharacterBody3D', 'ch07'] -->

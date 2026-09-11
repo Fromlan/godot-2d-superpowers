@@ -1,7 +1,7 @@
 ---
 name: godot-2d-physics
 description: |
-  Godot 4.7 2D 物理 / Body 选择 / 碰撞层级 / Area2D 触发器 / CharacterBody2D 移动 / 拖拽检测。Use when the user mentions "Godot 物理"、"2D 碰撞"、"Area2D"、"CharacterBody"、"RigidBody"、"collision_layer"、"碰撞层"、"范围攻击"、"触发器"、"拖拽判定"、"move_and_slide"、"is_on_floor". Do NOT use for 3D physics or pure UI drag (see godot-ui-best-practices). Read-only; applies rules when building / fixing Godot 2D scenes.
+  Godot 4.7 2D 物理:Body 选择、collision_layer/mask、Area2D 触发器、CharacterBody2D 移动与拖拽检测。Use when 提到"2D 碰撞"、"Area2D"、"CharacterBody"、"move_and_slide"、"is_on_floor" 等 2D 物理关键词。Do NOT use for 3D physics(见 godot-3d-superpowers)或纯 UI 拖拽(见 godot-ui-best-practices)。Read-only knowledge。
 last_reviewed: 2026-09-10
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: godot-audio
 description: |
-  Godot 4.7 音频 / AudioStreamPlayer / Audio bus 布局 / 音乐管理 autoload / SFX 随机 pitch / OGG / 3D 定位音。Use when the user mentions "Godot 音频"、"AudioStreamPlayer"、"音乐"、"音效"、"SFX"、"BGM"、"Audio bus"、"音量设置"、"AudioStreamPlayer2D/3D"、"AudioEffect". Do NOT use for UI click SFX (see godot-ui-best-practices) or video. Read-only; applies rules when building / fixing Godot audio.
+  Godot 4.7 音频:AudioStreamPlayer / 2D / 3D、Audio bus 布局、音乐管理 autoload、SFX pitch 与 pool、OGG 选型。Use when 提到"音频"、"SFX"、"BGM"、"Audio bus"、"音量设置"、"AudioStreamPlayer"。Do NOT use for UI 点击音效(见 godot-ui-best-practices)。Read-only knowledge。
 last_reviewed: 2026-09-10
 ---
 

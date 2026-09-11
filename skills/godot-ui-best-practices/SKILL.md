@@ -1,7 +1,7 @@
 ---
 name: godot-ui-best-practices
 description: |
-  Godot 4.7 UI / HUD / CanvasLayer / Control 实战最佳实践 + 常见踩坑。Use when the user mentions "Godot UI"、"HUD"、"Control"、"CanvasLayer"、"godot 拖拽"、"godot 按钮"、"godot 布局"、"mouse_filter"、"Theme"、or asks to build / fix UI scenes, HUD, menus, drag-and-drop. Triggers on "UI 优化"、"按钮没响应"、"点击没反应"、"拖不动"、"HUD 适配视口". Do NOT use for pure GDScript logic, non-UI scenes, or non-Godot engines.
+  Godot 4.7 UI/HUD:Control、CanvasLayer、mouse_filter、Theme、Container 布局、锚点、点击链。Use when 提到"UI"、"HUD"、"Control"、"CanvasLayer"、"godot 拖拽"、"按钮没响应"、"HUD 适配视口"。Do NOT use for 纯 GDScript 逻辑或非 Godot 引擎。Read-only knowledge。
 last_reviewed: 2026-09-10
 ---
 

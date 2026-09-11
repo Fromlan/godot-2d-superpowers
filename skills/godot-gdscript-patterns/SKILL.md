@@ -1,7 +1,7 @@
 ---
 name: godot-gdscript-patterns
 description: |
-  Godot 4.7 GDScript 静态类型 / @export / @onready / Signals 解耦 / Resource 数据驱动 / class_name 命名 / autoload 边界 / preload vs load。Use when the user mentions "GDScript 静态类型"、"@export"、"@onready"、"Signal 解耦"、"Resource 数据"、"class_name"、"autoload"、"类型注解"、"静态分析"。Do NOT use for UI layout (see godot-ui-best-practices) or engine subsystems (Physics/Audio/Animation have their own skills). Read-only.
+  Godot 4.7 GDScript:静态类型、@export / @onready、Signal 解耦、Resource 数据驱动、class_name、autoload 边界、preload vs load。Use when 提到"GDScript 静态类型"、"@export"、"@onready"、"Signal 解耦"、"Resource 数据"、"class_name"。Do NOT use for UI 布局(见 godot-ui-best-practices)。Read-only knowledge。
 last_reviewed: 2026-09-10
 ---
 

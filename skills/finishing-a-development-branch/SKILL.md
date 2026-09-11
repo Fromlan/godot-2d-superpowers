@@ -4,6 +4,8 @@ description: Use when implementation is complete, all tests pass, and you need t
 last_reviewed: 2026-09-10
 ---
 
+<!-- argument-hint: [merge | pr | keep | discard] -->
+
 # Finishing a Development Branch
 
 ## Overview

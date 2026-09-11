@@ -1,7 +1,7 @@
 ---
 name: godot-input-actions
 description: |
-  Godot 4.7 输入 / InputMap / action-based input / 项目设置 / 自定义设备 / 编程式注册 action / 输入回放。Use when the user mentions "Godot 输入"、"InputMap"、"input action"、"快捷键"、"按键绑定"、"手柄"、"gamepad"、"输入回放"、"is_action_pressed"、"get_vector"、"pause key"、"rebind". Do NOT use for UI Button clicks (see godot-ui-best-practices Rule 4, Rule 7) or mouse-only game logic. Reads-only knowledge.
+  Godot 4.7 输入:InputMap、action-based 输入、手柄/键盘/触屏绑定、编程式注册 action、输入回放。Use when 提到"InputMap"、"input action"、"快捷键"、"手柄"、"gamepad"、"is_action_pressed"、"get_vector"、"pause key"、"rebind"。Do NOT use for UI Button clicks(见 godot-ui-best-practices Rule 4)。Read-only knowledge。
 last_reviewed: 2026-09-10
 ---
 
