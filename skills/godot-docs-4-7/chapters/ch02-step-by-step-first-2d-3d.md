@@ -27,7 +27,7 @@ you can ship 80 % of small games.
   `Control._gui_input` / `Button`, etc.
 - **InputMap actions** — define named actions (`"jump"`, `"move_left"`) in
   Project Settings → Input Map; bind keyboard / mouse / gamepad to one name.
-- **`MainLoop.physics_fps` (60 by default)** — physics ticks at a fixed
+- **`physics/common/physics_ticks_per_second` (60 by default)** — physics ticks at a fixed
   rate; interpolate visuals with `lerp` if you need sub-step smoothing.
 
 ## Code Examples

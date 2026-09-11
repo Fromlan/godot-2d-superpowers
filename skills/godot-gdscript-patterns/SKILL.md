@@ -367,3 +367,5 @@ if Board.is_valid_position(some_pos):
 - Resource 加载错(规则 5)— 检查 `.import` 侧车;检查 `ResourceLoader.exists(path)`
 
 还卡住的话,静态分析器是你的朋友:`godot --headless --check-only res://path/to/script.gd` 会暴露类型错误。
+
+官方参考:[GDScript basics](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_basics.html) · [GDScript style guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_style_guide.html) · [Resources](https://docs.godotengine.org/en/stable/tutorials/scripting/resources.html) · [Signals](https://docs.godotengine.org/en/stable/getting_started/step_by_step/signals.html) · [Best practices](https://docs.godotengine.org/en/stable/tutorials/best_practices/index.html)

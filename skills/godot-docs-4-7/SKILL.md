@@ -1,7 +1,7 @@
 ---
 name: godot-docs-4-7
 description: "Godot 4.7 约定与 API 模式。Use when 问到 Godot/GDScript、场景组合、信号、CharacterBody vs RigidBody、InputMap、@export/@onready/@rpc、Forward+/GI、AnimationTree/Tween、shader、多人、导出/插件。"
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [topic, framework name, or chapter number, e.g. 'signal', '@rpc', 'CharacterBody3D', 'ch07'] -->
@@ -30,7 +30,7 @@ last_reviewed: 2026-09-10
 | [ch03](chapters/ch03-gdscript-overview.md) | GDScript 概述与语言参考 | 静态类型、@export / @onready / @rpc、class_name |
 | [ch04](chapters/ch04-signals-resources-scenes.md) | 信号、资源与场景 | Signal flags、Resource、PackedScene.instantiate() |
 | [ch05](chapters/ch05-best-practices.md) | 最佳实践与项目工作流 | Autoload、文件约定、VCS `.gitignore` |
-| [ch06](chapters/ch06-2d-graphics-physics.md) | 2D 图形、工具与物理 | CanvasItem、TileMap、CharacterBody2D、layers/masks |
+| [ch06](chapters/ch06-2d-graphics-physics.md) | 2D 图形、工具与物理 | CanvasItem、TileMapLayer、CharacterBody2D、layers/masks |
 | [ch07](chapters/ch07-3d-graphics-physics.md) | 3D 图形、工具与物理 | Forward+/Mobile/Compatibility、NavigationAgent3D、LightmapGI |
 | [ch08](chapters/ch08-shaders-audio-animation.md) | Shader、音频、动画 | .gdshader、AudioBus、AnimationTree/StateMachine、Tween |
 | [ch09](chapters/ch09-rendering-materials.md) | 渲染、材质与光照 | WorldEnvironment、GI 模式、SubViewport、LOD |
@@ -94,7 +94,7 @@ last_reviewed: 2026-09-10
 - **StateMachine (AnimationTree)** → ch08
 - **StaticBody2D / 3D** → ch06, ch07
 - **`SubViewport`** → ch09
-- **TileMap** → ch06
+- **TileMap / TileMapLayer** → ch06 (TileMap deprecated; prefer TileMapLayer)
 - **Tween** → ch08, ch10
 - **`uid://`** → ch11
 - **Variant** → ch03
@@ -109,4 +109,13 @@ last_reviewed: 2026-09-10
 
 ## 作用域与限制
 
-此 skill 覆盖 **Godot 4.7 参考**。它是 **引擎导向** — 不含项目特定业务逻辑、资源管线、或自定义编辑器工具。当问题漂移到你项目的细节,结合项目工具、项目的 CLAUDE.md、运行时检视。对 *本蒸馏外* 的内容(如移动平台签名、Steam 集成、主机 SDK),查官方文档 https://docs.godotengine.org 或相关供应商指南。
+此 skill 覆盖 **Godot 4.7 参考**。它是 **引擎导向** — 不含项目特定业务逻辑、资源管线、或自定义编辑器工具。当问题漂移到你项目的细节,结合项目工具、项目的 CLAUDE.md、运行时检视。
+
+对 *本蒸馏外* 的内容,查官方文档入口:
+
+- 首页:https://docs.godotengine.org/en/stable/
+- 类参考:https://docs.godotengine.org/en/stable/classes/index.html
+- 教程索引:https://docs.godotengine.org/en/stable/tutorials/index.html
+- 2D 教程:https://docs.godotengine.org/en/stable/tutorials/2d/index.html
+- 物理:https://docs.godotengine.org/en/stable/tutorials/physics/index.html
+- 导出:https://docs.godotengine.org/en/stable/tutorials/export/index.html

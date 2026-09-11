@@ -64,4 +64,4 @@ AnimatedSprite2D uses 1 GPU draw call per frame change; AnimationPlayer uses key
 
 ## Pitfall: pixel art + linear filter
 
-Make sure texture/filter = 0 (Nearest) in import settings, otherwise sprite cycles look blurry. See asset-pipeline skill §3.1.
+Make sure texture filtering is Nearest (Import Dock preset "2D Pixel", or `CanvasItem.texture_filter` / project `canvas_textures/default_texture_filter`), otherwise sprite cycles look blurry. See asset-pipeline skill §3.1.

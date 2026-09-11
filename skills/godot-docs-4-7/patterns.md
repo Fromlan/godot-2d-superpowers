@@ -109,7 +109,7 @@ naming once (`LAYER_PLAYER = 1 << 0`, etc.).
 **How:** your player / NPC / boss is a `CharacterBody*`; physics-driven
 crates, debris, ragdolls are `RigidBody*`.
 **Trade-off:** `RigidBody` is non-deterministic across machines unless
-you fix `physics_fps` and use deterministic integration; never host
+you fix `physics_ticks_per_second` and use deterministic integration; never host
 multiplayer simulation in pure RigidBodies.
 
 ## 10. Resource as Data, Node as Logic

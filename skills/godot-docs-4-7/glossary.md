@@ -88,7 +88,7 @@ definition with the chapter(s) it appears in. Alphabetical.
   than `String` (Ch 3, 10).
 - **SubViewport** — render target for HUDs, minimaps, screen-space
   effects (Ch 9).
-- **TileMap** — grid-based 2D world via a `TileSetAtlasSource` (Ch 6).
+- **TileMapLayer** — grid-based 2D world layer via a `TileSetAtlasSource` (Ch 6). Legacy **TileMap** is deprecated in 4.7.
 - **Tween** — one-shot interpolator; chain via `.tween_property()` /
   `.tween_callback()` (Ch 10, 8).
 - **uid://** — robust resource handle that survives renames (Ch 11).

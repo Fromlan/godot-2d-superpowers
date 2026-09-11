@@ -2,7 +2,7 @@
 name: godot-animation
 description: |
   Godot 4.7 动画:Tween、AnimationPlayer、AnimationTree/StateMachine、AnimatedSprite2D 选型与生命周期。Use when 提到"Tween"、"AnimationPlayer"、"StateMachine"、"精灵动画"、"缓动"、"动画状态机"。Do NOT use for 一次性 UI hover(见 godot-ui-best-practices)。Read-only knowledge。
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [animation type, e.g. 'Tween', 'AnimationTree', 'state machine'] -->
@@ -95,10 +95,12 @@ func _on_anim_animation_finished(anim_name: StringName) -> void:
 
 ```gdscript
 @onready var anim_tree: AnimationTree = $AnimationTree
+@onready var anim_player: AnimationPlayer = $AnimationPlayer
 
 func _ready() -> void:
     anim_tree.active = true
-    anim_tree.anim_player.connect("animation_finished", _on_anim_finished)
+    # anim_player on AnimationTree is a NodePath, not a node — connect on the player itself
+    anim_player.animation_finished.connect(_on_anim_finished)
 
 func request_state(name: String) -> void:
     # Set a parameter on the StateMachine (e.g. a trigger or boolean)
@@ -161,7 +163,14 @@ func _on_anim_finished(anim_name: StringName) -> void:
             pass  # wildcard
 ```
 
-对 AnimationTree,信号来自底层 `AnimationPlayer`。用 `anim_tree.anim_player.animation_finished` 连。
+对 AnimationTree,信号来自底层 `AnimationPlayer`(不是 AnimationTree)。注意 `AnimationTree.anim_player` 是 **NodePath**,不能直接 `.connect()`。应缓存 AnimationPlayer 节点后连:
+
+```gdscript
+@onready var anim_player: AnimationPlayer = $AnimationPlayer
+anim_player.animation_finished.connect(_on_anim_finished)
+```
+
+官方参考:[AnimationPlayer](https://docs.godotengine.org/en/stable/classes/class_animationplayer.html) · [AnimationTree](https://docs.godotengine.org/en/stable/classes/class_animationtree.html) · [Using AnimationTree](https://docs.godotengine.org/en/stable/tutorials/animation/animation_tree.html)
 
 **循环动画**(`loop = true` 在 inspector)不会每帧迭代都触发 `animation_finished`。只在 `stop()` 调用或动画手动结束时触发。
 
@@ -207,7 +216,7 @@ AnimationPlayer 的 "play" 动画有 2 个关键帧:
 | 大量节点每帧动 position | 批到一个父节点;动父节点 |
 | 多个 `AnimationPlayer` 每帧更新 | 在 player 之间共享动画(设 `animation` 资源) |
 | 长动画每帧评估 | 关键帧间隔低更 (0.05s 而不是 0.01s) |
-| `process_callback` 在 IDLE(默认)做视觉动画;PHYSICS 做运动 | 运动的动画关键帧化在 PHYSICS,与物理 tick 对齐 |
+| 进程回调 | 用 `AnimationMixer.callback_mode_process`(IDLE 做视觉;PHYSICS 做与物理对齐的运动)。旧 `process_callback` 枚举已弃用 |
 
 对 Z-2 9×9 棋盘 10-20 棋子,AnimationPlayer 成本可忽略。担心的是几百个同时动画的节点(UI tween + 50 粒子 + 20 敌人)。
 
@@ -243,3 +252,5 @@ AnimationPlayer 的 "play" 动画有 2 个关键帧:
 - AnimatedSprite2D:打印 `sprite.frame`、`sprite.animation`、`sprite.is_playing()`
 
 还卡住的话,回退到 `references/tween-vs-animationplayer.md` 的四个诊断。
+
+官方参考:[AnimationPlayer](https://docs.godotengine.org/en/stable/classes/class_animationplayer.html) · [AnimationTree](https://docs.godotengine.org/en/stable/classes/class_animationtree.html) · [Tween](https://docs.godotengine.org/en/stable/classes/class_tween.html) · [Animation documentation](https://docs.godotengine.org/en/stable/tutorials/animation/index.html) · [Using AnimationTree](https://docs.godotengine.org/en/stable/tutorials/animation/animation_tree.html)

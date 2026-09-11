@@ -7,7 +7,7 @@ Reference for SKILL.md §3.
 On the Area2D:
   area_entered(area: Area2D)         # another Area2D entered
   area_exited(area: Area2D)
-  body_entered(body: Node2D)         # CharacterBody2D / RigidBody2D / TileMap entered
+  body_entered(body: Node2D)         # CharacterBody2D / RigidBody2D / TileMapLayer entered
   body_exited(body: Node2D)
 
 On any CollisionObject2D:

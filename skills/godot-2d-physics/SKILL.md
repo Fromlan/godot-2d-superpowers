@@ -2,7 +2,7 @@
 name: godot-2d-physics
 description: |
   Godot 4.7 2D 物理:Body 选择、collision_layer/mask、Area2D 触发器、CharacterBody2D 移动与拖拽检测。Use when 提到"2D 碰撞"、"Area2D"、"CharacterBody"、"move_and_slide"、"is_on_floor" 等 2D 物理关键词。Do NOT use for 3D physics(见 godot-3d-superpowers)或纯 UI 拖拽(见 godot-ui-best-practices)。Read-only knowledge。
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [body type or topic, e.g. 'CharacterBody2D', 'collision_layer', 'Area2D 触发器'] -->
@@ -56,7 +56,7 @@ Wall.collision_mask      = 0b0011  (看到 Player + Enemy)
 # On Area2D node
 area_entered(area: Area2D)         # 另一个 Area2D 进入
 area_exited(area: Area2D)          # 另一个 Area2D 离开
-body_entered(body: Node2D)         # CharacterBody2D / RigidBody2D / TileMap 进入
+body_entered(body: Node2D)         # CharacterBody2D / RigidBody2D / TileMapLayer(或已弃用 TileMap)进入
 body_exited(body: Node2D)          # body 离开
 
 # On any CollisionObject2D
@@ -103,7 +103,7 @@ func _physics_process(_delta: float) -> void:
 
 `move_and_slide` 移动 body,应用速度,沿墙滑。发生任何 slide 返回 `true`。`is_on_floor()` 读最后一次碰撞的 floor 标志。
 
-**用 `_physics_process` 而非 `_process`** 处理移动。物理以 `physics_fps` tick(默认 60)。变时间步长 `_process` 会导致帧率相关物理。
+**用 `_physics_process` 而非 `_process`** 处理移动。物理以 `physics_ticks_per_second` tick(默认 60;脚本里常读 `Engine.physics_ticks_per_second` / `MainLoop.physics_fps`)。变时间步长 `_process` 会导致帧率相关物理。
 
 ## 5. `_physics_process` 中重构 motion 计算
 
@@ -158,11 +158,13 @@ func _physics_process(delta: float) -> void:
 | `CircleShape2D` | 圆形(金币、球) | 旋转不变;鼠标点击 hitbox 好 |
 | `CapsuleShape2D` | 有身高角色(平台跳跃) | 2D 版的胶囊 |
 | `SegmentShape2D` | 细线(平台边缘、剑弧) | 1D 碰撞 |
-| `WorldBoundaryShape2D` | 无限平面(地板、竞技场墙) | 仅 `StaticBody2D` |
-| `ConvexPolygonShape2D` | 不规则形状 | 最多 8 顶点;子节点定义点用 `CollisionPolygon2D` |
-| `SeparationRayShape2D` | 1D 射线 | 仅 `CharacterBody2D`,用于「前面有墙吗」 |
+| `WorldBoundaryShape2D` | 无限半平面(地板、竞技场墙) | 典型挂在 `StaticBody2D` |
+| `ConvexPolygonShape2D` | 不规则凸多边形 | 无官方硬顶点上限;复杂凹形用多个凸形或 `CollisionPolygon2D`(BUILD_SOLIDS) |
+| `SeparationRayShape2D` | 1D 射线 | 典型用于 `CharacterBody2D` 贴地/上楼梯 |
 
 俯视 2D 棋子:`CircleShape2D` 半径匹配视觉范围。
+
+官方参考:[CollisionObject2D](https://docs.godotengine.org/en/stable/classes/class_collisionobject2d.html) · [Shape2D](https://docs.godotengine.org/en/stable/classes/class_shape2d.html) · [Using Area2D](https://docs.godotengine.org/en/stable/tutorials/physics/using_area_2d.html) · [Using CharacterBody2D](https://docs.godotengine.org/en/stable/tutorials/physics/using_character_body_2d.html)
 
 ## 8. 层位命名约定
 
@@ -181,18 +183,20 @@ const LAYER_PREDICTION := 1 << 7   # 128 (ghost bodies, ignored by gameplay)
 
 用常量而不是裸数字。编辑器也有位域编辑器(任何 CollisionObject2D inspector 顶部),若在 **Project Settings → Layer Names → 2D Physics** 设了层名,可以按名勾选。
 
-## 9. `physics_fps` 调优
+## 9. 物理 tick 调优(`physics_ticks_per_second`)
 
 默认 60。需要慢模拟(RTS、大世界)省 CPU 降到;格斗游戏(帧精确命中)提高。
 
 ```ini
 [physics]
-common/physics_fps = 60
+common/physics_ticks_per_second = 60
 ```
 
-与 `_physics_process` 间隔挂钩。设 `physics_fps = 30`,`_physics_process(delta)` 收 `delta ≈ 0.0333`。速度驱动的移动正确缩放(乘 delta),所以 30 Hz 物理不会让世界变慢。
+与 `_physics_process` 间隔挂钩。设 `physics_ticks_per_second = 30`,`_physics_process(delta)` 收 `delta ≈ 0.0333`。速度驱动的移动正确缩放(乘 delta),所以 30 Hz 物理不会让世界变慢。
 
-**反模式**:设 `physics_fps = 1000` 想「修抖动」。修在代码里(平滑、子步)。1000 Hz 烧 CPU 没收益。
+**反模式**:设到 1000 想「修抖动」。修在代码里(平滑、子步)。1000 Hz 烧 CPU 没收益。
+
+官方参考:[ProjectSettings.physics/common/physics_ticks_per_second](https://docs.godotengine.org/en/stable/classes/class_projectsettings.html#class-projectsettings-property-physics-common-physics-ticks-per-second) · [Physics introduction](https://docs.godotengine.org/en/stable/tutorials/physics/physics_introduction.html) · [CharacterBody2D](https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html) · [Area2D](https://docs.godotengine.org/en/stable/classes/class_area2d.html)
 
 ## 10. `_process` vs `_physics_process` — 何时用哪个
 
@@ -239,3 +243,5 @@ common/physics_fps = 60
 - 自定义代码驱动 motion 错(规则 4 / 5)— 在 `move_and_slide` 前后 `print(position)`
 
 还卡住的话,回退到 `references/body-decision.md` 里的四个诊断。
+
+官方参考:[CharacterBody2D](https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html) · [Area2D](https://docs.godotengine.org/en/stable/classes/class_area2d.html) · [CollisionObject2D](https://docs.godotengine.org/en/stable/classes/class_collisionobject2d.html) · [Using CharacterBody2D](https://docs.godotengine.org/en/stable/tutorials/physics/using_character_body_2d.html) · [Using Area2D](https://docs.godotengine.org/en/stable/tutorials/physics/using_area_2d.html) · [Physics introduction](https://docs.godotengine.org/en/stable/tutorials/physics/physics_introduction.html)

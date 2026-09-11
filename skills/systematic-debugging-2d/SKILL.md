@@ -1,7 +1,7 @@
 ---
 name: systematic-debugging-2d
 description: 当用户报告 2D Godot 项目中的 bug、性能问题或意外行为时使用,或说「有 bug」/「现象是...」/「帧率低」/「卡顿」。4 阶段根因分析流程,针对 2D 物理、动画、渲染问题专项。
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [physics | animation | rendering | performance | logic] -->
@@ -71,7 +71,7 @@ last_reviewed: 2026-09-10
 
 **逻辑相关**:
 - 状态机转移条件不互斥
-- 初始化顺序依赖(@onready 在 _ready 之后才生效)
+- 初始化顺序依赖(在 `_enter_tree` / 父节点 `_ready` 之前访问 `@onready` 节点)
 - preload 路径不存在,运行时报错
 
 ## 3. Phase 3 — 验证(逐个排除)
@@ -141,8 +141,8 @@ last_reviewed: 2026-09-10
 ### 4.3 渲染专项
 
 ```
-□ 像素艺术 texture/filter = Nearest?
-□ texture/mipmap 关?
+□ 像素艺术 texture_filter = Nearest?(节点/项目 `canvas_textures/default_texture_filter`,不是 `.import` 的 texture/filter)
+□ mipmaps/generate = false?(`.import` 键)
 □ 节点 z_index 显式设?
 □ CanvasLayer 用于 HUD 不参与场景变换?
 □ 视口拉伸设置 vs 美术分辨率一致?

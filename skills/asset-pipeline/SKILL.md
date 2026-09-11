@@ -1,7 +1,7 @@
 ---
 name: asset-pipeline
 description: 在 2D Godot 项目中添加或修改美术/音频/动画/字体资源时使用,或当用户说「加图片」/「换音乐」/「做动画」/「换字体」。强制命名约定、导入设置、版本管理、依赖追踪。
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [sprite | audio | animation | font | bundle] -->
@@ -13,7 +13,7 @@ last_reviewed: 2026-09-10
 
 ## 0. 何时用
 
-- 加/换任何 `.png` / `.svg` / `.wav` / `.ogg` / `.mp3` / `.ttf` / `.otf` / `.json` (TileMap)
+- 加/换任何 `.png` / `.svg` / `.wav` / `.ogg` / `.mp3` / `.ttf` / `.otf` / `.json` (TileMapLayer / TileSet)
 - 做 `AnimatedSprite2D` 帧序列 / `AnimationPlayer` 资源
 - 改导入设置(过滤、压缩、mipmap、像素吸附)
 - 删/移动资源
@@ -77,28 +77,35 @@ assets/
 - ...
 - `player_run_024.png`
 
-Godot 的 `SpriteFrames` 资源会自动按字典序排,零填充保证顺序。
+Godot 的 `SpriteFrames` 资源按**插入顺序**排帧;从文件夹批量导入时通常按文件名排序,零填充保证顺序正确。
 
 ### 2.3 音频
 
-- 短音效(`< 1s`): `.wav` (无压缩)
+- 短音效(`< 1s`): `.wav` (PCM,无解码延迟)
 - 长音效 / BGM: `.ogg` (Vorbis)
-- **不**用 `.mp3`(Godot 4.7 支持但延迟大)
+- `.mp3`: Godot 4 原生支持,但短 SFX 优先 `.ogg`/`.wav`;非必要不作为默认格式
 
 ## 3. 导入设置(必须显式配置)
 
-> **2D 项目默认值**:`compress/mode = 0`(Lossless)。Godot 4 官方文档明确说明 `2=VRAM Compressed` 和 `4=Basis Universal` **仅用于 3D 场景,不用于 2D 元素**(VRAM 压缩会让 2D 像素艺术出现块状瑕疵,Basis Universal 对小尺寸 2D 资源体积反而不优)。3D 项目才需要在这几个 mode 之间权衡。
+> **2D 项目默认值**:`compress/mode = 0`(Lossless)。`2=VRAM Compressed` 对 2D 像素艺术常出现块状瑕疵,优先 2D 用 Lossless;`4=Basis Universal` 可用于 Web 分发的小体积纹理,但不是 2D 默认。3D 项目才需要在 VRAM/Basis 之间权衡。参见 [Importing images](https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_images.html)。
 
 
 每个资源第一次导入后,Godot 生成 `.import` 文件。**必须**改对的设置:
 
-### 3.1 像素艺术(`Filter = Off`)
+### 3.1 像素艺术(Filter = Off / Nearest)
+
+Godot 4 的 `.import` **没有** `texture/filter` / `texture/mipmap` 键。像素过滤通过:
+
+1. **Import Dock** 选 preset **"2D Pixel"**(推荐)
+2. 或项目级:Project Settings → `rendering/textures/canvas_textures/default_texture_filter` = Nearest
+3. 或节点级:`CanvasItem.texture_filter` = Nearest
+
+`.import` 里相关的是:
 
 ```ini
 [params]
-compress/mode = 0   # Lossless(2D 默认;VRAM Compressed 仅用于 3D)
-texture/filter = 0  # Nearest(像素艺术)
-texture/mipmap = 0  # 关
+compress/mode = 0          # Lossless(2D 默认)
+mipmaps/generate = false   # 关 mipmap(像素风)
 ```
 
 **位置**: 选中图片 → Import Dock → preset "2D Pixel"
@@ -106,15 +113,17 @@ texture/mipmap = 0  # 关
 ### 3.2 矢量图 / UI
 
 ```
-compress/mode = 0   # Lossless(2D 通用);若需在线分发可改 4 Basis Universal
-texture/filter = 1  # Linear
+compress/mode = 0          # Lossless
+mipmaps/generate = false   # 按需
 ```
+
+过滤用项目/节点 `texture_filter = Linear`(不在 `.import` 的 `texture/filter` 键里)。Web 分发可考虑 `compress/mode = 4` Basis Universal。
 
 ### 3.3 音频
 
 - `.wav`: 不重压缩,保持 PCM
 - `.ogg`: Vorbis @ 128kbps
-- `.mp3`: 转 `.ogg` 后再导入(避免授权问题)
+- `.mp3`: 可导入;短 SFX 建议转 `.ogg`/`.wav`(MP3 专利已过期,无授权问题)
 
 ### 3.4 字体
 
@@ -181,10 +190,12 @@ texture/filter = 1  # Linear
 - ❌ 文件名带空格 / 中文 / 大写
 - ❌ 像素艺术开了 Linear Filter(糊)
 - ❌ 在 `scenes/` 放图片
-- ❌ `.mp3` 大量使用
+- ❌ 短 SFX 大量用 `.mp3`(改 `.ogg`/`.wav`)
 - ❌ 资源引用写死绝对路径
 - ❌ 不删断引用,留下空指针
 - ❌ 没记来源/许可就上传
+
+官方参考:[Importing images](https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_images.html) · [Importing audio samples](https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_audio_samples.html) · [Import process](https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/import_process.html) · [Resources](https://docs.godotengine.org/en/stable/tutorials/scripting/resources.html)
 
 ## 11. 衔接
 

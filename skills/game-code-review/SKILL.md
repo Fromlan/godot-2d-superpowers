@@ -87,7 +87,7 @@ last_reviewed: 2026-09-11
 
 ### 3.5 物理(2D 重点)
 
-- [ ] CharacterBody2D 配合 move_and_slide,不用 RigidBody 做角色
+- [ ] CharacterBody2D 配合 move_and_slide,不用 RigidBody2D 做角色
 - [ ] Area2D 用于触发器,不参与物理模拟
 - [ ] collision_layer / collision_mask 显式设置,不靠默认
 - [ ] 物理 tick 频率合理(默认 60Hz)
@@ -125,7 +125,7 @@ last_reviewed: 2026-09-11
 - [ ] commit message 含任务 ID
 - [ ] 无遗留 print() 调试输出
 - [ ] 无遗留注释掉的代码
-- [ ] 无 .import / .godot/ 提交
+- [ ] 无 `.godot/` 缓存提交(`.import` **应**提交,与官方 VCS 指引一致)
 
 ## 4. 输出格式
 

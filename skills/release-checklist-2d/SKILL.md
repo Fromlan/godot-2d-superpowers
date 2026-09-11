@@ -1,7 +1,7 @@
 ---
 name: release-checklist-2d
 description: Use when user is about to release/build a 2D Godot game, or says 「导出」 / 「打包」 / 「release version」. 平台特定清单(Windows/Mac/Linux/Web/Android)、版本号、changelog、build 产物、发布后冒烟测试。
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [windows | mac | linux | web | android | full] -->
@@ -71,7 +71,7 @@ last_reviewed: 2026-09-10
 
 ## 3. 导出预设(必做)
 
-把 export_presets.cfg 加到 project.godot 或在编辑器里保存:
+导出预设保存在项目根的**独立文件** `export_presets.cfg`(与 `project.godot` 同级,不要合并进 project.godot)。在编辑器 Project → Export 里配置后保存即可生成该文件。
 
 ### 3.1 Windows Desktop
 

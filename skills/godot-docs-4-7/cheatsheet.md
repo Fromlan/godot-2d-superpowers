@@ -101,7 +101,7 @@ collide with*. Document the bits once per project.
 | `Forward+` | desktop | mobile, legacy |
 | `Mobile` | phones | battery-bound |
 | `Compatibility` | fallback | OpenGL ES 3.0 max |
-| `physics_fps` | 60 | turn down for slow sims; turn up for fighting/character games |
+| `physics_ticks_per_second` | 60 | turn down for slow sims; turn up for fighting/character games |
 | `rendering/anti_aliasing/quality/msaa_3d` | disabled | enable on desert / strong-contrast shaders |
 
 ## Performance Sanity Heuristics

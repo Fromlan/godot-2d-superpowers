@@ -2,7 +2,7 @@
 name: godot-audio
 description: |
   Godot 4.7 音频:AudioStreamPlayer / 2D / 3D、Audio bus 布局、音乐管理 autoload、SFX pitch 与 pool、随吉选型。Use when 提到"音频"、"SFX"、"BGM"、"Audio bus"、"音量设置"、"AudioStreamPlayer"。Do NOT use for UI 点击音效(见 godot-ui-best-practices)。Read-only knowledge。
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [topic, e.g. 'bus', 'BGM', '3D 定位音', 'SFX pitch'] -->
@@ -120,7 +120,7 @@ Boss 用大招时,你希望音乐短暂下降,让 SFX 突出:
 
 ```gdscript
 func duck_music(target_db := -12.0, time := 0.2) -> void:
-    var music_bus_idx := AudioServer.get_bus.get_bus_index("Music")
+    var music_bus_idx := AudioServer.get_bus_index("Music")
     # tween the bus volume down
     var t := create_tween()
     t.tween_method(
@@ -137,10 +137,10 @@ func duck_music(target_db := -12.0, time := 0.2) -> void:
 | 格式 | 用途 |
 |------|------|
 | `.ogg`(Vorbis 128kbps) | BGM、长 SFX |
-| `.wav`(PCM) | 短 SFX(< 1s)、无压缩延迟 |
-| `.mp3` | **不用**(Godot 4 支持但解码延迟高;有授权问题) |
+| `.wav`(PCM) | 短 SFX(< 1s)、无解码延迟 |
+| `.mp3` | 可用;短 SFX 仍优先 `.ogg`/`.wav` |
 
-短音效 < 1s 用 `.wav`(无压缩);长音效 / BGM 用 `.ogg`(Vorbis)。**不**用 `.mp3`(Godot 4.7 支持但延迟大)。
+短音效 < 1s 用 `.wav`(无解码延迟);长音效 / BGM 用 `.ogg`(Vorbis)。`.mp3` Godot 4 原生支持,非必要不作为默认。
 
 ## 7. 音量滑块 + 持久化到 `user://settings.cfg`
 
@@ -176,7 +176,9 @@ func load_volume() -> void:
     set_master_volume(master)
 ```
 
-设置 UI 中的滑块在 `value_changed` 调 `set_master_volume(0.5)`,`mouse_exited`(或 `tween.tween_callback` 防抖)调 `调_save_volume()`。
+设置 UI 中的滑块在 `value_changed` 调 `set_master_volume(0.5)`,`mouse_exited`(或 `tween.tween_callback` 防抖)调 `save_volume()`。
+
+官方参考:[AudioServer](https://docs.godotengine.org/en/stable/classes/class_audioserver.html) · [Audio buses](https://docs.godotengine.org/en/stable/tutorials/audio/audio_buses.html)
 
 ## 8. SFX player pool(避免每次播放新建)
 
@@ -223,7 +225,7 @@ p.play()
 
 对长音(音乐、环境音):不要连 `finished → queue_free`;让 player 在管理器生命周期内持续存在。
 
-## 10. 3D 音频:距离衰减与 HRTF
+## 10. 3D 音频:距离衰减与声像
 
 对 3D 定位音(`AudioStreamPlayer3D`):
 
@@ -231,13 +233,15 @@ p.play()
 @onready var audio: AudioStreamPlayer3D = $AudioStreamPlayer3D
 
 # In the inspector:
-# - max_distance: how far the sound is audible (e.g. 50)
-# - unit_size: world unit scale (e.g. 1 meter = 1)
-# - attenuation_model: inverse_distance, logarithmic, etc.
-# - panning_strength: 0 = no panning, 1 = full HRTF
+# - max_distance: 超过则完全听不到 (0 = 不限制; e.g. 50)
+# - unit_size: 衰减尺度 (default 10.0)
+# - attenuation_model: ATTENUATION_INVERSE_DISTANCE (0), LOGARITHMIC (2), DISABLED (3)...
+# - panning_strength: 声像强度系数 (default 1.0;0 = 禁用立体声声像)
 ```
 
 默认衰减「Inverse Distance」对多数游戏够用。「Logarithmic」更真实但近源处更响。音乐用 `attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED` 设为全局。
+
+官方参考:[AudioStreamPlayer3D](https://docs.godotengine.org/en/stable/classes/class_audiostreamplayer3d.html) · [Audio streams](https://docs.godotengine.org/en/stable/tutorials/audio/audio_streams.html)
 
 ## 常见 bug 模式
 
@@ -273,3 +277,5 @@ p.play()
 - 音频上下文重置(罕见)— 暂停恢复时再调 `AudioServer.set_bus_volume_db`
 
 还卡住的话,回退到:打印场景里每个 `AudioStreamPlayer.bus`,通过 `AudioServer.get_bus_*` 检查每个 bus 的 `volume_db` 和 `mute` 状态。
+
+官方参考:[AudioServer](https://docs.godotengine.org/en/stable/classes/class_audioserver.html) · [AudioStreamPlayer](https://docs.godotengine.org/en/stable/classes/class_audiostreamplayer.html) · [AudioStreamPlayer2D](https://docs.godotengine.org/en/stable/classes/class_audiostreamplayer2d.html) · [AudioStreamPlayer3D](https://docs.godotengine.org/en/stable/classes/class_audiostreamplayer3d.html) · [Audio buses](https://docs.godotengine.org/en/stable/tutorials/audio/audio_buses.html) · [Audio streams](https://docs.godotengine.org/en/stable/tutorials/audio/audio_streams.html)

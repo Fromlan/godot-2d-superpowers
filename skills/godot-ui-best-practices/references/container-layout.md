@@ -20,12 +20,14 @@ Reference for SKILL.md §1 + §2.
 
 | Constant | Value | Meaning |
 |----------|-------|---------|
-| SIZE_SHRINK_END | 0 | shrink to fit; default |
-| SIZE_FILL | 1 | fill available space |
+| SIZE_SHRINK_BEGIN | 0 | shrink to fit, align start (same as no flag) |
+| SIZE_FILL | 1 | fill available space (property default) |
 | SIZE_EXPAND | 2 | parent grows the slot |
-| SIZE_EXPAND_FILL | 3 | both |
+| SIZE_EXPAND_FILL | 3 | EXPAND + FILL |
 | SIZE_SHRINK_CENTER | 4 | center, shrink |
-| SIZE_SHRINK_BEGIN | 8 | align to start |
+| SIZE_SHRINK_END | 8 | shrink to fit, align end |
+
+Source: [Control.SizeFlags](https://docs.godotengine.org/en/stable/classes/class_control.html#enum-control-sizeflags)
 
 size_flags_horizontal and size_flags_vertical are separate.
 
@@ -65,7 +67,7 @@ Popup (CenterContainer)
 
 PanelContainer sizes to its child. If the child VBox has size_flags_vertical = SIZE_FILL, it tries to fill — PanelContainer then expands to fit, growing past its offset_bottom and overflowing into adjacent UI.
 
-Fix: inner VBoxContainer.size_flags_vertical = 0 (SHRINK_END).
+Fix: inner `VBoxContainer.size_flags_vertical = Control.SIZE_SHRINK_BEGIN` (0) or `Control.SIZE_SHRINK_END` (8).
 
 ## Pitfall: Manual position
 

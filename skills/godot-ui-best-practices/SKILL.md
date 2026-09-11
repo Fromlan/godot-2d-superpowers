@@ -2,7 +2,7 @@
 name: godot-ui-best-practices
 description: |
   Godot 4.7 UI/HUD:Control、CanvasLayer、mouse_filter、Theme、Container 布局、锚点、点击链。Use when 提到"UI"、"HUD"、"Control"、"CanvasLayer"、"godot 拖拽"、"按钮没响应"、"HUD 适配视口"。Do NOT use for 纯 GDScript 逻辑或非 Godot 引擎。Read-only knowledge。
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [rule number or symptom, e.g. '3', 'mouse_filter', '拖 不触发'] -->
@@ -38,11 +38,22 @@ Container 类型与何时用:
 
 ```gdscript
 # Expand fill horizontal + shrink end vertical — header bar pattern
-header.size_flags_horizontal = Control.SIZE_EXPAND_FILL   # 1
-header.size_flags_vertical   = Control.SIZE_SHRINK_END   # 0
+header.size_flags_horizontal = Control.SIZE_EXPAND_FILL   # 3
+header.size_flags_vertical   = Control.SIZE_SHRINK_END   # 8
 ```
 
-值:`0=SHRINK_END`, `1=FILL`, `2=EXPAND`, `3=EXPAND_FILL`。`EXPAND`(父扩张该槽)+ `FILL`(子填满该槽)是常见的「可拉伸」组合。
+官方 SizeFlags 枚举([Control](https://docs.godotengine.org/en/stable/classes/class_control.html#enum-control-sizeflags)):
+
+| 常量 | 值 | 含义 |
+|------|-----|------|
+| `SIZE_SHRINK_BEGIN` | 0 | 缩到内容大小、对齐起点(等同无 flag) |
+| `SIZE_FILL` | 1 | 填满可用空间(属性默认) |
+| `SIZE_EXPAND` | 2 | 请求父 Container 扩槽 |
+| `SIZE_EXPAND_FILL` | 3 | EXPAND + FILL |
+| `SIZE_SHRINK_CENTER` | 4 | 缩到内容、居中 |
+| `SIZE_SHRINK_END` | 8 | 缩到内容、对齐终点 |
+
+`EXPAND` + `FILL` 是常见的「可拉伸」组合。
 
 **陷阱**:`PanelContainer` 套 `VBoxContainer` 子。如果内层 `VBoxContainer` 默认 `size_flags_vertical = SIZE_FILL`(1),它要填满父。`PanelContainer` 就扩展适配 `VBoxContainer`。结果:panel 长过 `offset_bottom`,溢进相邻 UI。**修复**:内层 `VBoxContainer.size_flags_vertical = 0`(SHRINK_END)让 panel 用 its offset rect。
 
@@ -69,7 +80,7 @@ button.mouse_filter  = Control.MOUSE_FILTER_STOP     # 0
 
 ## 4. 点击事件链:`_input` → `_gui_input` → `_unhandled_input`
 
-对 UI Button,**始终** 连 `Button.pressed` 信号。**不要**在轮轮在 `_unhandled_input` 里轮询点击驱动 button 动作。
+对 UI Button,**始终** 连 `Button.pressed` 信号。**不要**在 `_unhandled_input` 里轮询点击去驱动 button 动作。
 
 ```gdscript
 # Right — 信号驱动式
@@ -241,7 +252,7 @@ UI 坏时按顺序:
 |------|------|------|
 | Button 点击无效 | `_input` 处理函数吃了它 | 用 `pressed` 信号(规则 4) |
 | 拖拽在物体上可以但不在其 label 上 | Label `mouse_filter=STOP` | 设 `MOUSE_FILTER_IGNORE`(规则 3) |
-| Panel 长过 `offset_bottom` | 内层 `VBox` 是 `SIZE_FILL` | 设 `size_flags_vertical = 0`(规则 2) |
+| Panel 长过 `offset_bottom` | 内层 `VBox` 是 `SIZE_FILL` | 设 `size_flags_vertical = Control.SIZE_SHRINK_BEGIN` (0) 或 `SIZE_SHRINK_END` (8)(规则 2) |
 | HUD 被切底 | viewport 小于设计 | stretch mode `expand` 或重设设计 |
 | resize 后 Panel 位置错 | 用了绝对 `position`,不是锚点 | 用锚点(规则 11) |
 | Tween 在场景切换时冻结 | autoload 管理的 tween;在 `queue_free` 前取消 | 在 `_exit_tree` `kill()`(规则 6) |
@@ -255,6 +266,8 @@ UI 坏时按顺序:
 - `references/mouse-and-click.md` — `_input` 链、拖拽模式、`mouse_filter` 深入
 - `references/visual-feedback.md` — Tween 模式、modulate、自定义鼠标
 - `references/responsive-layout.md` — 锚点、stretch 模式、多分辨率
+
+官方参考:[Control](https://docs.godotengine.org/en/stable/classes/class_control.html) · [GUI documentation](https://docs.godotengine.org/en/stable/tutorials/ui/index.html) · [Multiple resolutions](https://docs.godotengine.org/en/stable/tutorials/rendering/multiple_resolutions.html) · [Container](https://docs.godotengine.org/en/stable/classes/class_container.html)
 
 ## 输出契约
 

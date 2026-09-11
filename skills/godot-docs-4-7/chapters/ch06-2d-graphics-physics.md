@@ -5,7 +5,7 @@
 ## Core Idea
 Godot 2D is **not a 3D engine flattened to Z=0**: it ships a dedicated
 2D renderer (`CanvasItem` pipeline), a 2D physics server, and 2D-native
-tools (`TileMap`, `Path2D`, `Polygon2D`, `Skeleton2D`). Use the 2D-native
+tools (`TileMapLayer`, `Path2D`, `Polygon2D`, `Skeleton2D`). Use the 2D-native
 nodes; reaching for 3D nodes in a 2D project fights the engine.
 
 ## Frameworks Introduced
@@ -14,8 +14,9 @@ nodes; reaching for 3D nodes in a 2D project fights the engine.
 - **`_draw()` for procedural art**: override `_draw()` on a `Node2D` and
   call `draw_circle`, `draw_rect`, `draw_polygon`. Recompute only when
   data changes (`queue_redraw()`).
-- **`TileMap` with `TileSetAtlasSource`** for grid-based levels —
+- **`TileMapLayer` with `TileSetAtlasSource`** for grid-based levels —
   handles occluders, navigation polygons, terrain transitions.
+  (Legacy `TileMap` is deprecated in 4.7; use one `TileMapLayer` per layer.)
 - **Lights via `PointLight2D` / `DirectionalLight2D`** in normal /
   additive blend modes; `CanvasModulate` tints the whole scene.
 - **2D physics layers & masks**: bodies have `collision_layer` (bits 1–32
@@ -72,7 +73,7 @@ func _on_pickup_area_area_entered(area: Area2D) -> void:
 | `Area2D` | overlap (no physics response) |
 | `CharacterBody2D` | player / kinematic thing |
 | `RigidBody2D` | crates, debris, physics-driven objects |
-| `TileMap` | grid-based worlds |
+| `TileMapLayer` | grid-based worlds (TileMap is deprecated) |
 
 | Physics body decision | Pick |
 |---|---|

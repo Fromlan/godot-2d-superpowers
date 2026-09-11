@@ -2,7 +2,7 @@
 name: godot-input-actions
 description: |
   Godot 4.7 输入:InputMap、action-based 输入、手柄/键盘/触屏绑定、编程式注册 action、输入回放。Use when 提到"InputMap"、"input action"、"快捷键"、"手柄"、"gamepad"、"is_action_pressed"、"get_vector"、"pause key"、"rebind"。Do NOT use for UI Button clicks(见 godot-ui-best-practices Rule 4)。Read-only knowledge。
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [topic, e.g. 'action', 'gamepad', 'rebind', 'is_action_pressed'] -->
@@ -26,7 +26,7 @@ func _unhandled_input(event: InputEvent) -> void:
         velocity.y = -JUMP_VELOCITY
 ```
 
-**为什么**:基于 action 的输入允许用户重新绑定键位(Steam Input、无障碍设置、不同语言键盘)。裸 `KEYSPACE` 永远锁死在一个键上。同一份代码可工作在手柄、键盘、触屏。
+**为什么**:基于 action 的输入允许用户重新绑定键位(Steam Input、无障碍设置、不同语言键盘)。裸 `KEY_SPACE` 永远锁死在一个键上。同一份代码可工作在手柄、键盘、触屏。
 
 纯鼠标游戏用 `_unhandled_input` + `InputEventMouseButton` 可以 — 但 **仍然** 给点击定义 InputMap action(如 `select_piece`),这样支持重绑定。
 
@@ -69,7 +69,7 @@ velocity = dir * SPEED
 - 手柄左摇杆:合成为单个 2D 向量
 - 键盘 + 手柄:两者累加
 
-`Input.get_vector` 第 5 个可选参数是 `deadzone`(默认 0.2)。低于该模长的输入会被夹到零 — 防止摇杆漂移造成误移动。
+`Input.get_vector` 第 5 个可选参数是 `deadzone`,**默认 -1.0**(表示使用 Project Settings 中对应 action 的 deadzone;0 是有效的死区数值,不要与默认混淆)。低于该模长的输入会被夹到零 — 防止摇杆漂移造成误移动。
 
 ```gdscript
 # 2-direction: 1D axis (e.g. menu navigation)
@@ -133,8 +133,8 @@ Input.get_joy_axis(0, JOY_AXIS_LEFT_X)
 
 | Action | Default binding | 用途 |
 |---|---|---|
-| `ui_accept` | Enter / Space | 确认 |
-| `ui_select` | Enter / Space | 选中(主要用于 ItemList/Tree) |
+| `ui_accept` | Enter / Space / Gamepad A | 确认 |
+| `ui_select` | Space / Gamepad A | 选中(主要用于 ItemList/Tree;Enter 属于 `ui_accept`) |
 | `ui_cancel` | Escape | 取消 |
 | `ui_focus_next` / `ui_focus_prev` | Tab / Shift+Tab | 焦点切换 |
 | `ui_left` / `ui_right` / `ui_up` / `ui_down` | 方向键 | UI 导航 |
@@ -143,7 +143,9 @@ Input.get_joy_axis(0, JOY_AXIS_LEFT_X)
 | `ui_text_*` | (无默认) | 文本输入 |
 | `ui_pause` | (无默认) | 暂停 |
 
-用于 UI 导航。游戏动作自己定义。
+用于 UI 导航。游戏动作自己定义。以 Project Settings → Input Map → Show Built-in Actions 为准。
+
+官方参考:[Input](https://docs.godotengine.org/en/stable/classes/class_input.html) · [InputMap](https://docs.godotengine.org/en/stable/classes/class_inputmap.html) · [Using InputEvent](https://docs.godotengine.org/en/stable/tutorials/inputs/inputevent.html) · [Input examples](https://docs.godotengine.org/en/stable/tutorials/inputs/input_examples.html)
 
 ## 7. 输入事件录制(回放 / 存档)
 
@@ -238,7 +240,7 @@ func _on_sensitivity_value_changed(value: float) -> void:
 |------|------|------|
 | Action 始终 false | 没在 InputMap 中定义 | 加到 Project Settings → Input Map |
 | 手柄没反应 | action 只绑了键盘 | 同一 action 加手柄绑定 |
-| `is_action_just_pressed` 没触发 | 该 API 只在 transition 帧返回 true;在长循环里可能错过 | 在 `_physics_process` (60Hz) 用,不要在 `_process` |
+| `is_action_just_pressed` 没触发 | 该 API 只在 transition 帧返回 true;在长循环里可能错过 | 物理移动在 `_physics_process` 读取以与 tick 对齐;UI/相机等也可在 `_process` 用 |
 | 两个 action 同一键都触发 | 同一事件绑到多个 action | 检查 InputMap 去重 |
 | 编程注册的 action 在编辑器不可见 | `InputMap.add_action` 仅影响运行时;编辑器的真相在 `project.godot` | 编辑器可见性需写 `project.godot` |
 | 鼠标位置值不对 | 窗口缩放后,鼠标坐标是窗口像素空间,不是视口 | 用 `get_canvas_transform().affine_inverse() * get_viewport().get_mouse_position()` |
@@ -264,3 +266,5 @@ func _on_sensitivity_value_changed(value: float) -> void:
 - `print(Input.get_joy_axis(0, JOY_AXIS_LEFT_X))` 读摇杆值
 
 还卡住的话,回退到 `references/inputmap-setup.md` 里的四个诊断。
+
+官方参考:[Input](https://docs.godotengine.org/en/stable/classes/class_input.html) · [InputMap](https://docs.godotengine.org/en/stable/classes/class_inputmap.html) · [InputEvent](https://docs.godotengine.org/en/stable/classes/class_inputevent.html) · [Using InputEvent](https://docs.godotengine.org/en/stable/tutorials/inputs/inputevent.html) · [Input examples](https://docs.godotengine.org/en/stable/tutorials/inputs/input_examples.html)

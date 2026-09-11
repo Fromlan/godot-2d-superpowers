@@ -116,7 +116,7 @@ last_reviewed: 2026-09-11
 - **关卡边界**: `StaticBody2D` + `CollisionShape2D` (Rectangle)
 - **调试输出**: `print()` 在控制台
 - **录制**: Windows 自带录屏(Game Bar: Win+G),或 OBS
-- **输入**: 直接读 `Input.is_action_pressed`,不写 InputMap(原型阶段)
+- **输入**: 在 Input Map 写死最少 action,再用 `Input.is_action_pressed` 读取(action 必须先注册,否则始终 false);可用 `InputMap.add_action` 代码快速补
 
 ## 5. 衔接(prototype → plan,NOTES.md 数值迁移)
 

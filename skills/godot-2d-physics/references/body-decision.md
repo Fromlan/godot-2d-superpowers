@@ -34,7 +34,7 @@ func _input(event: InputEvent) -> void:
 ## Why CharacterBody2D for player
 
 - Input → velocity → move_and_slide is a 1:1 mapping; you know the next frame's state
-- Frame-rate independent because _physics_process ticks at physics_fps (default 60)
+- Frame-rate independent because _physics_process ticks at physics_ticks_per_second (default 60)
 - Replay-friendly: the same input produces the same trajectory
 - RigidBody2D blends your impulses with physics solver → results drift between machines
 

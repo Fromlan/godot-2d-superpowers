@@ -36,7 +36,7 @@ last_reviewed: 2026-09-11
 
 ```
 关卡数据
-├── 网格 / 瓦片? → TileMap + TileSet(.tres)
+├── 网格 / 瓦片? → TileMapLayer + TileSet(.tres)(TileMap 已弃用)
 ├── 实体布局(敌人/道具/触发器)? → LevelLayout(.tres) + JSON
 ├── 波形 / 时间轴(清版/Roguelike)? → WaveConfig(.tres) + 计时
 └── 简单纯静态 → 直接在 .tscn 摆(限 ≤ 10 个实体)
@@ -165,11 +165,12 @@ func _ready() -> void:
 | 调试中的单个关卡 | 先手摆,稳定后转数据 |
 | 程序生成(Roguelike) | 必须数据驱动 |
 
-## 6. TileMap 集成(可选,瓦片地图)
+## 6. TileMapLayer 集成(可选,瓦片地图;TileMap 已弃用)
 
 - `TileSet` 资源 → `resources/tilesets/terrain.tres`
-- 关卡用 `TileMapLayer` + 关联 TileSet
+- 关卡用 `TileMapLayer` + 关联 TileSet(一层一个节点)
 - 数据可放 `level_01_tile_data.tres` 或编辑器绘制后保存
+- 官方参考:[TileMapLayer](https://docs.godotengine.org/en/stable/classes/class_tilemaplayer.html) · [Using Tilemaps](https://docs.godotengine.org/en/stable/tutorials/2d/using_tilemaps.html)
 
 ## 7. 难度调参(数据驱动)
 

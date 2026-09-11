@@ -56,17 +56,17 @@ $facts = @(
     @{
         id = "F001"
         skill = "skills/godot-2d-physics/SKILL.md"
-        claim = "CharacterBody2D has method move_and_collide (inherited from PhysicsBody2D)"
+        claim = "CharacterBody2D has method move_and_slide"
         url = "https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html"
-        regex = 'class-characterbody2d-method-move-and-collide'
+        regex = 'class-characterbody2d-method-move-and-slide'
         expect = $true
     },
     @{
         id = "F002"
         skill = "skills/godot-2d-physics/SKILL.md"
-        claim = "CharacterBody2D has method move_and_slide"
+        claim = "CharacterBody2D has method is_on_floor"
         url = "https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html"
-        regex = 'class-characterbody2d-method-move-and-slide'
+        regex = 'class-characterbody2d-method-is-on-floor'
         expect = $true
     },
     @{
@@ -80,59 +80,15 @@ $facts = @(
     @{
         id = "F004"
         skill = "skills/godot-2d-physics/SKILL.md"
-        claim = "test_move is a method on PhysicsBody2D (CharacterBody2D inherits it)"
+        claim = "PhysicsBody2D has method test_move"
         url = "https://docs.godotengine.org/en/stable/classes/class_physicsbody2d.html"
         regex = 'class-physicsbody2d-method-test-move'
         expect = $true
     },
     @{
-        id = "F010"
-        skill = "skills/asset-pipeline/SKILL.md"
-        claim = "compress/mode = 0 means Lossless"
-        url = "https://docs.godotengine.org/en/stable/classes/class_resourceimportertexture.html"
-        regex = 'Lossless'
-        expect = $true
-    },
-    @{
-        id = "F011"
-        skill = "skills/asset-pipeline/SKILL.md"
-        claim = "VRAM Compressed is described in docs as 'Only use for textures in 3D scenes, not for 2D elements'"
-        url = "https://docs.godotengine.org/en/stable/classes/class_resourceimportertexture.html"
-        regex = 'Only use for textures in 3D scenes, not for 2D elements'
-        expect = $true
-    },
-    @{
-        id = "F020"
-        skill = "skills/godot-audio/SKILL.md"
-        claim = "AudioServer has method set_bus_volume_db(bus_idx: int, volume_db: float)"
-        url = "https://docs.godotengine.org/en/stable/classes/class_audioserver.html"
-        regex = 'set_bus_volume_db'
-        expect = $true
-    },
-    @{
-        id = "F021"
-        skill = "skills/godot-audio/SKILL.md"
-        claim = "AudioServer has method get_bus_index(bus_name: StringName)"
-        url = "https://docs.godotengine.org/en/stable/classes/class_audioserver.html"
-        regex = 'get_bus_index'
-        expect = $true
-    },
-    @{
-        id = "F030"
-        mode = "stripped"
-        skill = "skills/godot-audio/SKILL.md"
-        claim = "Tween has method tween_method(method: Callable, from: Variant, to: Variant, duration: float)"
-        url = "https://docs.godotengine.org/en/stable/classes/class_tween.html"
-        regex = 'tween_method\s*\(\s*method:\s*Callable'
-        expect = $true
-    }
-)
-
-
-    @{
         id = "F005"
         skill = "skills/godot-2d-physics/SKILL.md"
-        claim = "CharacterBody2D inherits from PhysicsBody2D (so it has move_and_collide, test_move, etc.)"
+        claim = "CharacterBody2D inherits from PhysicsBody2D"
         url = "https://docs.godotengine.org/en/stable/classes/class_characterbody2d.html"
         regex = 'class-physicsbody2d'
         expect = $true
@@ -140,7 +96,7 @@ $facts = @(
     @{
         id = "F006"
         skill = "skills/godot-ui-best-practices/SKILL.md"
-        claim = "Control.mouse_filter default is STOP (0) - eats events"
+        claim = "Control.mouse_filter has MOUSE_FILTER_STOP"
         url = "https://docs.godotengine.org/en/stable/classes/class_control.html"
         regex = 'MOUSE_FILTER_STOP'
         expect = $true
@@ -156,19 +112,165 @@ $facts = @(
     @{
         id = "F008"
         skill = "skills/godot-gdscript-patterns/SKILL.md"
-        claim = "Typed Dictionary syntax Dictionary[K, V] supported (Godot 4.4+)"
+        claim = "Typed Dictionary syntax Dictionary[K, V] supported"
         url = "https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_basics.html"
         regex = 'Dictionary\[K, V\]'
         expect = $true
     },
     @{
-        id = "F009"
+        id = "F010"
+        skill = "skills/asset-pipeline/SKILL.md"
+        claim = "compress/mode = 0 means Lossless"
+        url = "https://docs.godotengine.org/en/stable/classes/class_resourceimportertexture.html"
+        regex = 'Lossless'
+        expect = $true
+    },
+    @{
+        id = "F012"
+        skill = "skills/asset-pipeline/SKILL.md"
+        claim = "Texture importer uses mipmaps/generate (not texture/mipmap)"
+        url = "https://docs.godotengine.org/en/stable/classes/class_resourceimportertexture.html"
+        regex = 'mipmaps/generate'
+        expect = $true
+    },
+    @{
+        id = "F020"
         skill = "skills/godot-audio/SKILL.md"
-        claim = "AudioServer.get_bus_index accepts a StringName parameter"
+        claim = "AudioServer has method set_bus_volume_db"
+        url = "https://docs.godotengine.org/en/stable/classes/class_audioserver.html"
+        regex = 'set_bus_volume_db'
+        expect = $true
+    },
+    @{
+        id = "F021"
+        skill = "skills/godot-audio/SKILL.md"
+        claim = "AudioServer has method get_bus_index (NOT get_bus.get_bus_index)"
         url = "https://docs.godotengine.org/en/stable/classes/class_audioserver.html"
         regex = 'get_bus_index'
         expect = $true
+    },
+    @{
+        id = "F030"
+        mode = "stripped"
+        skill = "skills/godot-audio/SKILL.md"
+        claim = "Tween has method tween_method"
+        url = "https://docs.godotengine.org/en/stable/classes/class_tween.html"
+        regex = 'tween_method\s*\(\s*method:\s*Callable'
+        expect = $true
+    },
+    @{
+        id = "F040"
+        skill = "skills/godot-ui-best-practices/SKILL.md"
+        claim = "Control.SIZE_EXPAND_FILL = 3"
+        url = "https://docs.godotengine.org/en/stable/classes/class_control.html"
+        regex = 'SIZE_EXPAND_FILL` \= `3'
+        expect = $true
+    },
+    @{
+        id = "F041"
+        skill = "skills/godot-ui-best-practices/SKILL.md"
+        claim = "Control.SIZE_SHRINK_END = 8 (not 0)"
+        url = "https://docs.godotengine.org/en/stable/classes/class_control.html"
+        regex = 'SIZE_SHRINK_END` \= `8'
+        expect = $true
+    },
+    @{
+        id = "F042"
+        skill = "skills/godot-ui-best-practices/SKILL.md"
+        claim = "Control.SIZE_SHRINK_BEGIN = 0"
+        url = "https://docs.godotengine.org/en/stable/classes/class_control.html"
+        regex = 'SIZE_SHRINK_BEGIN` \= `0'
+        expect = $true
+    },
+    @{
+        id = "F050"
+        skill = "skills/godot-animation/SKILL.md"
+        claim = "AnimationTree.anim_player is NodePath (not a node reference)"
+        url = "https://docs.godotengine.org/en/stable/classes/class_animationtree.html"
+        regex = 'anim\\\\_player.*NodePath|NodePath.*anim\\\\_player|anim\\_player.*=.*NodePath'
+        expect = $true
+    },
+    @{
+        id = "F051"
+        skill = "skills/godot-animation/SKILL.md"
+        claim = "AnimationPlayer.play has custom_blend parameter"
+        url = "https://docs.godotengine.org/en/stable/classes/class_animationplayer.html"
+        regex = 'custom\\_blend'
+        expect = $true
+    },
+    @{
+        id = "F060"
+        skill = "skills/godot-input-actions/SKILL.md"
+        claim = "Input.get_vector deadzone default is -1.0 (project settings)"
+        url = "https://docs.godotengine.org/en/stable/classes/class_input.html"
+        regex = 'deadzone:\s*\[float\].*= -1\.0'
+        expect = $true
+    },
+    @{
+        id = "F061"
+        skill = "skills/godot-input-actions/SKILL.md"
+        claim = "Input.get_connected_joypads exists"
+        url = "https://docs.godotengine.org/en/stable/classes/class_input.html"
+        regex = 'get\\_connected\\_joypads'
+        expect = $true
+    },
+    @{
+        id = "F070"
+        skill = "skills/godot-2d-physics/SKILL.md"
+        claim = "Area2D has monitoring and monitorable properties"
+        url = "https://docs.godotengine.org/en/stable/classes/class_area2d.html"
+        regex = 'monitorable'
+        expect = $true
+    },
+    @{
+        id = "F071"
+        skill = "skills/godot-2d-physics/SKILL.md"
+        claim = "Area2D signals include body_entered"
+        url = "https://docs.godotengine.org/en/stable/classes/class_area2d.html"
+        regex = 'body\\_entered'
+        expect = $true
+    },
+    @{
+        id = "F080"
+        skill = "skills/godot-docs-4-7/chapters/ch06-2d-graphics-physics.md"
+        claim = "TileMap is deprecated in favor of TileMapLayer"
+        url = "https://docs.godotengine.org/en/stable/classes/class_tilemap.html"
+        regex = 'Deprecated'
+        expect = $true
+    },
+    @{
+        id = "F081"
+        skill = "skills/level-data-flow/SKILL.md"
+        claim = "TileMapLayer class exists"
+        url = "https://docs.godotengine.org/en/stable/classes/class_tilemaplayer.html"
+        regex = 'TileMapLayer'
+        expect = $true
+    },
+    @{
+        id = "F090"
+        skill = "skills/godot-2d-physics/SKILL.md"
+        claim = "Project setting key is physics/common/physics_ticks_per_second"
+        url = "https://docs.godotengine.org/en/stable/classes/class_projectsettings.html"
+        regex = 'physics/common/physics\\_ticks\\_per\\_second|physics-common-physics-ticks-per-second'
+        expect = $true
+    },
+    @{
+        id = "F091"
+        skill = "skills/release-checklist-2d/SKILL.md"
+        claim = "CLI supports --quit-after N iterations"
+        url = "https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html"
+        regex = 'quit-after'
+        expect = $true
+    },
+    @{
+        id = "F092"
+        skill = "skills/release-checklist-2d/SKILL.md"
+        claim = "export_presets.cfg is a standalone file (not merged into project.godot)"
+        url = "https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html"
+        regex = 'export_presets\.cfg'
+        expect = $true
     }
+)
 
 # ---- Run checks ----
 $results = @()
