@@ -1,104 +1,103 @@
 ---
 name: release-checklist-2d
-description: Use when user is about to release/build a 2D Godot game, or says 'export' / 'package' / 'release version' / 'release'. Platform-specific checklist (Windows/Mac/Linux/Web/Android), version bumping, changelog, build artifacts, and post-release smoke testing.
+description: "Use when user is about to release/build a 2D Godot game, or says "导出" / "打包" / "release version". 平台特定清单(Windows/Mac/Linux/Web/Android)、版本号、changelog、build 产物、发布后冒烟测试。"
 last_reviewed: 2026-09-10
 ---
 
 <!-- argument-hint: [windows | mac | linux | web | android | full] -->
 
-# Release Checklist 2D (Godot)
+# 发布清单 2D (Godot)
 
-> 2D Godot game pre-release full-process checklist.
-> Output: distributable build artifacts + version number + changelog.
+> 2D Godot 游戏发布前全流程清单。
+> 产出:可分发的 build 产物 + 版本号 + changelog。
 
-## 0. Routing (single question)
+## 0. 路由(单题)
 
-| Option | Path |
-|last_reviewed: 2026-09-10
-------|------|
-| A. Windows only | 1-6 |
-| B. Mac | 1-6 + Mac signing (7) |
+| 选项 | 走法 |
+|------|------|
+| A. 仅 Windows | 1-6 |
+| B. Mac | 1-6 + Mac 签名 (7) |
 | C. Linux | 1-6 |
-| D. Web (itch.io) | 1-6 + Web export (8) |
+| D. Web (itch.io) | 1-6 + Web 导出 (8) |
 | E. Android | 1-6 + Android APK (9) |
-| F. All platforms | 1-9 |
+| F. 全平台 | 1-9 |
 
-## 0.5. Godot API claims audit (must do, before bumping)
+## 0.5. Godot API claims 审计(必做,在 bump 之前)
 
-Run the docs-alignment check first; any FAIL blocks the release:
+先跑文档对齐校验,任何 FAIL 阻塞发布:
 
 ```powershell
 .\scripts\verify-godot-claims.ps1 -Strict
 ```
 
-Output goes to `build/audit/godot-claims-<date>.md`. If FAILs appear, fix the SKILL.md (this skills pack) **first**, then re-run.
+输出到 `build/audit/godot-claims-<date>.md`。若出现 FAIL,**先**改对应 SKILL.md(本套件),然后重跑。
 
-**Add new fact**: extend the `$facts` array in `scripts/verify-godot-claims.ps1`. Each entry needs an id, the asserting skill file, the claim, the doc URL, and a regex that proves the claim.
+**新增 fact**:在 `scripts/verify-godot-claims.ps1` 的 `$facts` 数组里追加条目。每个条目需要 id、断言所在 skill 文件、claim、文档 URL、能证明 claim 的 regex。
 
-## 1. Version Number (must do)
+## 1. 版本号(必做)
 
-> **Skill freshness**: any Godot knowledge skill (`godot-*`) whose `last_reviewed` in frontmatter is more than 90 days old must be re-reviewed before this release. Use `grep -l "last_reviewed" skills/godot-*/SKILL.md` to enumerate.
+> **Skill 时效性**:任何 `godot-*` 知识类技能,如果 frontmatter 里的 `last_reviewed` 超过 90 天,本次发布前必须重新 review。用 `grep -l "last_reviewed" skills/godot-*/SKILL.md` 枚举。
 
-Use SemVer vX.Y.Z:
+用 SemVer vX.Y.Z:
 
-- X = major (gameplay / engine overhaul)
-- Y = minor (new mechanic / new level)
-- Z = patch (bug fix / balance)
+- X = major(玩法 / 引擎大改)
+- Y = minor(新机制 / 新关卡)
+- Z = patch(bug 修复 / 平衡)
 
-Modify:
-- project.godot: config/version = "X.Y.Z"
-- README.md: version badge
+修改:
+- project.godot:config/version = "X.Y.Z"
+- README.md:版本号 badge
 
-## 2. Changelog (must do, user-visible)
+## 2. Changelog(必做,用户可见)
 
-Write to CHANGELOG.md:
+写到 CHANGELOG.md:
 
 ```markdown
 ## [X.Y.Z] - YYYY-MM-DD
 
 ### Added
-- new feature 1
-- new feature 2
+- 新功能 1
+- 新功能 2
 
 ### Changed
-- behavior change 1
+- 行为变更 1
 
 ### Fixed
-- bug fix 1
+- bug 修复 1
 
 ### Removed
-- removed feature (if any)
+- 移除功能(若有)
 ```
 
-## 3. Export Presets (must do)
+## 3. 导出预设(必做)
 
-Add export_presets.cfg to project.godot or save from editor:
+把 export_presets.cfg 加到 project.godot 或在编辑器里保存:
 
 ### 3.1 Windows Desktop
 
 - Name: Windows Desktop
 - Platform: Windows
-- Format: Game.exe (with PCK)
-- Include PDB: false (release)
-- Encryption: off (affects load)
+- Format: Game.exe(含 PCK)
+- Include PDB: false(发布版)
+- Encryption: off(影响加载)
 
 ### 3.2 Web
 
 - Name: Web
 - Format: index.html + index.pck + index.wasm
-- Disable physics multithread: physics/2d/run_on_thread = false (Web compatible)
-- Optimization: html/canvas_resize_policy = 1
+- 禁用物理多线程:physics/2d/run_on_thread = false(Web 兼容)
+- 优化:html/canvas_resize_policy = 1
 
 ### 3.3 Android
 
 - Package: com.yourstudio.yourgame
-- Min SDK: 24 (Android 7.0)
+- Min SDK: 24(Android 7.0)
 - Target SDK: 34
-- Signing: debug keystore (test) / release keystore (publish)
+- 签名:debug keystore(测试)/ release keystore(发布)
 
-## 4. Build (must do)
+## 4. 构建(必做)
 
-Run scripts/export-build.ps1 <platform>, generates:
+跑 scripts/export-build.ps1 <platform>,生成:
 
 ```
 build/
@@ -109,119 +108,119 @@ build/
   web/index.wasm
 ```
 
-## 5. Post-Build Smoke (must do)
+## 5. 构建后冒烟(必做)
 
 ### Windows
 
 ```powershell
-# Run 60s, pass if no error
+# 跑 60s, 无报错即通过
 & "build/windows/yourgame.exe" --quit-after 60
 
-# Check no fatal error
+# 检查无致命错误
 Get-Content build/windows/console.log
 ```
 
 ### Web
 
 ```powershell
-# Start local HTTP server
+# 启动本地 HTTP server
 cd build/web && python -m http.server 8080
 
-# Open http://localhost:8080 in browser, manual verify
+# 在浏览器打开 http://localhost:8080, 手动验证
 ```
 
 ### Android
 
 - adb install build/android/yourgame.apk
-- Run on real device + play 5 min
-- Verify input, audio, performance
+- 在真机跑 + 玩 5 分钟
+- 验证输入、音频、性能
 
-## 6. Assets + License (must do)
+## 6. 资产 + 许可(必做)
 
-- [ ] All assets have ATTRIBUTION (assets/ATTRIBUTION.md)
-- [ ] Third-party library license texts included (THIRD_PARTY_LICENSES.md)
-- [ ] Font / music / art license covers distribution
+- [ ] 所有资产都有 ATTRIBUTION (assets/ATTRIBUTION.md)
+- [ ] 第三方库许可文本已收录 (THIRD_PARTY_LICENSES.md)
+- [ ] 字体 / 音乐 / 美术许可覆盖分发范围
 
-## 7. Mac Signing (Mac only)
+## 7. Mac 签名(仅 Mac)
 
-- [ ] Apple Developer certificate
+- [ ] Apple Developer 证书
 - [ ] codesign --deep --force --options=runtime --sign "Developer ID Application: ..." yourgame.app
 - [ ] xcrun notarytool submit yourgame.zip --keychain-profile <profile>
-- [ ] Notarization complete (staple ticket)
+- [ ] 公证完成(staple ticket)
 
-## 8. Web Specific (Web only)
+## 8. Web 特定(仅 Web)
 
 - [ ] physics/2d/run_on_thread = false
-- [ ] Audio uses AudioStreamPlayer (not 3D positioned AudioStreamPlayer2D)
-- [ ] Input supports touch (InputEventScreenTouch) if needed
-- [ ] Upload to itch.io: zip entire web/ directory
+- [ ] 音频用 AudioStreamPlayer(不是 3D 定位的 AudioStreamPlayer2D)
+- [ ] 输入支持触屏 (InputEventScreenTouch) 若需要
+- [ ] 上传 itch.io:把整个 web/ 目录打 zip
 
-## 9. Android Specific (Android only)
+## 9. Android 特定(仅 Android)
 
-- [ ] editor/export/android keystore set
-- [ ] use_apk_expansion = false (unless OBB needed)
-- [ ] Permissions minimal (INTERNET only if network needed)
-- [ ] Multi-resolution support: stretch/mode = "canvas_items", stretch/aspect = "expand"
-- [ ] Background pause: Main Loop Type = Standard
+- [ ] editor/export/android keystore 已设置
+- [ ] use_apk_expansion = false(除非需要 OBB)
+- [ ] 权限最小化(需要联网时才加 INTERNET)
+- [ ] 多分辨率支持:stretch/mode = "canvas_items", stretch/aspect = "expand"
+- [ ] 后台暂停:Main Loop Type = Standard
 
-## 10. Performance Baseline Compare (recommended)
+## 10. 性能基线对比(推荐)
 
-Run once before release, record:
+发布前跑一次,记录:
 
 ```
-- Startup time: <X>s
-- Main scene FPS: <X>
-- Memory peak: <X>MB
-- Package size: <X>MB
+- 启动时间: <X>s
+- 主场景 FPS: <X>
+- 内存峰值: <X>MB
+- 包大小: <X>MB
 ```
 
-Compare with last version, pass if no regression.
+对比上一版本,无回退即通过。
 
-## 11. Git Tag (must do)
+## 11. Git Tag(必做)
 
 ```powershell
 git tag -a v1.0.0 -m "Release v1.0.0"
 git push origin v1.0.0
 ```
 
-## 12. Distribution
+## 12. 分发
 
-| Platform | Channel |
+| 平台 | 渠道 |
 |------|------|
-| Windows | itch.io / Steam / self-host |
+| Windows | itch.io / Steam / 自托管 |
 | Mac | Steam / Mac App Store |
-| Linux | Steam / itch.io / self-host |
+| Linux | Steam / itch.io / 自托管 |
 | Web | itch.io (HTML5) |
 | Android | Google Play |
 
-## 13. Anti-Patterns (forbidden pre-release)
+## 13. 反模式(发布前禁止)
 
-- Includes debug print()
-- Includes dev-branch TODO
-- Includes uncompressed dev assets (large files)
-- Includes test scenes (tests/)
-- Includes .godot/ cache
-- Version not bumped
-- Changelog missing
-- No smoke run before release
+- 含调试 print()
+- 含 dev-branch TODO
+- 含未压缩的开发资产(大文件)
+- 含测试场景 (tests/)
+- 含 .godot/ 缓存
+- 版本号未 bump
+- 缺少 changelog
+- 发布前没跑冒烟
 
-## 14. Follow-up
+## 14. 后续
 
-- After release: monitor feedback, prepare hotfix (Z version)
-- Steam integration: separate skill/wiki (out of scope)
+- 发布后:监控反馈,准备 hotfix(Z 版本)
+- Steam 集成:独立 skill/wiki(超出本套件范围)
 
-## Appendix — Common Commands
+## 附录 — 常用命令
 
 ```powershell
-# Export
+# 导出
 godot --headless --export-release "Windows Desktop" build/windows/yourgame.exe
 
-# Run build
+# 跑构建产物
 & "build/windows/yourgame.exe"
 
-# View console.log
-# Windows: create console.log in game dir, game writes to it
+# 查看 console.log
+# Windows: 在游戏目录创建 console.log, 游戏会写进去
 
-# Upload to itch.io (using butler CLI)
+# 上传 itch.io (用 butler CLI)
 butler push build/windows yourname/yourgame:windows --userversion 1.0.0
 ```

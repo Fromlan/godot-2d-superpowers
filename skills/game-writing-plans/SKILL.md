@@ -1,12 +1,12 @@
 ---
 name: game-writing-plans
-description: Use when GDD is approved and user wants to start implementation, or says "写计划" / "拆任务" / "开始开发". Godot 2D specific: 5-15 minute task granularity, explicit scene/script/asset categorization per task, includes subagent dispatch rules.
+description: "当 GDD 已批准,用户想开始实现,或说"写计划"/"拆任务"/"开始开发"时使用。Godot 2D 专项:5-15 分钟任务粒度,每任务的显式场景/脚本/资产分类,含子代理派发规则。"
 last_reviewed: 2026-09-10
 ---
 
 <!-- argument-hint: [from-gdd | from-feature | from-bug] -->
 
-# Game Writing Plans (2D Godot)
+# 游戏开发规划 (2D Godot)
 
 > 把 GDD / 功能需求拆成可执行的小任务,每个任务 5-15 分钟。
 > 走完本技能,产出 `plans/<plan-name>.md`,可直接喂给 `godot-coding-2d` 执行。

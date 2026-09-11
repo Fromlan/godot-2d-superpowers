@@ -1,12 +1,12 @@
 ---
 name: asset-pipeline
-description: Use when adding or modifying art/audio/animation/font assets in a 2D Godot project, or when user says "加图片" / "换音乐" / "做动画" / "换字体". Enforces naming convention, import settings, version management, and dependency tracking.
+description: "在 2D Godot 项目中添加或修改美术/音频/动画/字体资源时使用,或当用户说"加图片"/"换音乐"/"做动画"/"换字体"。强制命名约定、导入设置、版本管理、依赖追踪。"
 last_reviewed: 2026-09-10
 ---
 
 <!-- argument-hint: [sprite | audio | animation | font | bundle] -->
 
-# Asset Pipeline (2D Godot)
+# 资产管线 (2D Godot)
 
 > 2D 游戏资产生命周期管理:命名、导入、版本、依赖、引用。
 > 走完本技能,产出"命名规范、导入配置正确、依赖可追溯"的资源。

@@ -1,12 +1,12 @@
 ---
 name: level-data-flow
-description: Use when designing, modifying, or extending a 2D game level, or when user says "改关卡" / "加关" / "调整难度". Bridges GDD design intent to Godot scenes/resources: level data as .tres or JSON, scene composition from data, deterministic loading.
+description: "设计、修改或扩展 2D 关卡时的使用,或当用户说"改关卡"/"加关"/"调整难度"。把 GDD 设计意图桥接到 Godot 场景/资源:关卡数据作为 .tres 或 JSON、场景由数据组合、确定性加载。"
 last_reviewed: 2026-09-10
 ---
 
 <!-- argument-hint: [design-to-data | data-to-scene | tune-balance] -->
 
-# Level Data Flow (2D Godot)
+# 关卡数据流 (2D Godot)
 
 > 把"关卡设计意图"映射到 Godot 资源,再从数据生成/调整场景。
 > 走完本技能,产出"数据驱动、可一键生成、参数化调难度"的关卡。

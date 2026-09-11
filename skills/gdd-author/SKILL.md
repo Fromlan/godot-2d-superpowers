@@ -1,12 +1,12 @@
 ---
 name: gdd-author
-description: "撰写 GDD(游戏设计文档):按规模自适应 Game jam / Solo / Team 三档模板。Use when 用户提到 "GDD"、"核心循环"、"玩法机制"、"设计支柱" 等。Do NOT use for 实现层细节(见 godot-coding-2d)、关卡数据(见 level-data-flow)、资源(见 asset-pipeline)。"
+description: "撰写 GDD(游戏设计文档):按规模自适应 Game jam / Solo / Team 三档模板。当用户提到"GDD"、"核心循环"、"玩法机制"、"设计支柱"等时使用。"
 last_reviewed: 2026-09-10
 ---
 
 <!-- argument-hint: [from-scratch | review | section-fix | scale-jam | scale-solo | scale-team] -->
 
-# GDD Author
+# GDD 作者
 
 游戏设计文档（Game Design Document, GDD）撰写。从一句话创意到完整 GDD, 按规模自适应输出 Game jam / Solo / Team 三档模板, 文档自动落到 Obsidian 灵感库。
 

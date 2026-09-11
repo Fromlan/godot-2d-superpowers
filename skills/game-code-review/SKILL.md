@@ -1,12 +1,12 @@
 ---
 name: game-code-review
-description: Use when a batch of implementation tasks is complete, before merging a feature branch, or when user says 'review 一下' / '看看代码'. Two-stage review: spec compliance (against the plan/GDD) and Godot code quality (anti-patterns). Reports issues by severity, blocks only on critical.
+description: "一批实现任务完成、或准备合并功能分支、或用户说"review 一下"/"看看代码"时使用。两阶段审查:规格合规(对照计划/GDD)和 Godot 代码质量(反模式)。按严重度报告问题,仅关键问题阻塞。"
 last_reviewed: 2026-09-10
 ---
 
 <!-- argument-hint: [batch | feature | full-game] -->
 
-# Game Code Review (2D Godot)
+# 游戏代码审查 (2D Godot)
 
 > 对一批完成的实现任务做两阶段审查:
 > 1. **规格合规**:代码是否做了计划要它做的事

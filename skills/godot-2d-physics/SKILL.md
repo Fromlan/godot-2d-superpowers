@@ -7,76 +7,74 @@ last_reviewed: 2026-09-10
 
 <!-- argument-hint: [body type or topic, e.g. 'CharacterBody2D', 'collision_layer', 'Area2D 触发器'] -->
 
-# Godot 2D Physics (4.7)
+# Godot 2D 物理 (4.7)
 
-Actionable rules for Godot 4 2D physics. Each rule states the failure mode, the fix, and a one-liner. Deep dives in `references/<topic>.md`.
+Godot 4 2D 物理的实操规则。每条规则说明失败模式、修复、一句话总结。深入阅读见 `references/<topic>.md`。
 
-## 1. The body decision matrix
+## 1. Body 决策矩阵
 
-Pick the body by what controls motion, not what it "is":
+按「谁控制运动」而不是「它是什么」选 body:
 
-| Use case | Body | Why |
-|last_reviewed: 2026-09-10
----|---|---|
-| Player, NPC, anything you move with logic each frame | `CharacterBody2D` | you drive `velocity` and call `move_and_slide`; deterministic, frame-accurate input |
-| Crate, ball, debris, ragdoll, anything the engine should simulate | `RigidBody2D` | gravity, impulses, friction handled by the physics server |
-| Trigger / pickup / damage zone / drag hit-test | `Area2D` | overlap detection only, no physics response |
-| Static level geometry (walls, floor, platforms) | `StaticBody2D` | immobile, optimized for non-moving colliders |
+| 场景 | Body | 为什么 |
+|------|------|--------|
+| 玩家、NPC、每帧用逻辑驱动的物体 | `CharacterBody2D` | 你驱动 `velocity` 调 `move_and_slide`;确定性、帧精确输入 |
+| 箱子、球、碎片、布偶,引擎模拟 | `RigidBody2D` | 重力、冲量、摩擦由物理服务器处理 |
+| 触发 / 拾取 / 伤害区 / 拖拽命中测试 | `Area2D` | 仅重叠检测,无物理响应 |
+| 静态关卡几何(墙、地板、平台) | `StaticBody2D` | 不动,为非移动碰撞体优化 |
 
-**The wrong call**: `RigidBody2D` for the player. The physics server is non-deterministic across machines (bad for replays / multiplayer), and your input gets blended with gravity in ways you can't fully control. `CharacterBody2D` is the right answer for "I move this with code".
+**错误选择**:玩家用 `RigidBody2D`。物理服务器跨机器非确定性(对回放 / 多人不好),且你的输入被重力混合到你无法完全控制。`CharacterBody2D` 是「我用代码移动它」的正确选择。
 
-## 2. `collision_layer` vs `collision_mask` — the 32-bit bitfield
+## 2. `collision_layer` vs `collision_mask` — 32 位位域
 
-Every `CollisionObject2D` (parent of Area2D, CharacterBody2D, etc.) has two bitfields:
+每个 `CollisionObject2D`(Area2D、CharacterBody2D 等的父类)有两个位域:
 
-- `collision_layer` — **what I am** (bits I broadcast)
-- `collision_mask` — **what I collide with** (bits I check against)
+- `collision_layer` — **我是谁**(广播的位)
+- `collision_mask` — **我撞谁**(检查的位)
 
-A collision happens iff (A's mask & B's layer) != 0 AND (B's mask & A's layer) != 0.
+碰撞发生 iff (A.mask & B.layer) != 0 **且** (B.mask & A.layer) != 0。
 
 ```
 Player.collision_layer   = 0b0001  (LAYER_PLAYER)
-Player.collision_mask    = 0b1110  (everything except LAYER_PLAYER)
+Player.collision_mask    = 0b1110  (除自身外全部)
 
 Enemy.collision_layer    = 0b0010  (LAYER_ENEMY)
-Enemy.collision_mask     = 0b0001  (only sees Player)
+Enemy.collision_mask     = 0b0001  (只看到 Player)
 
 Wall.collision_layer     = 0b0100  (LAYER_WORLD)
-Wall.collision_mask      = 0b0011  (sees Player + Enemy)
+Wall.collision_mask      = 0b0011  (看到 Player + Enemy)
 ```
 
-**Why this beats `if`-checks**: changing a body's "what I hit" is a one-field edit in the Inspector, no code change, no "I forgot to update both objects" bug.
+**为什么胜过 `if` 检查**:改一个 body 的「我撞什么」是 Inspector 单字段编辑,不用改代码,不会有「我忘了同步两个对象」的 bug。
 
-**`Area2D` rule**: Area2D's `monitoring` (broadcasts `area_entered`) vs `monitorable` (others can detect it via their mask). For a damage zone: `monitoring = true` so it sees bodies; for a pickup hitbox on a player: `monitorable = true` so pickups can detect it.
+**`Area2D` 规则**:`monitoring`(广播 `area_entered`)vs `monitorable`(别人通过它们的 mask 检测)。伤害区:`monitoring = true` 看 body;玩家身上的拾取 hitbox:`monitorable = true` 让拾取能检测到。
 
-## 3. Area2D signal-driven triggers
+## 3. Area2D 信号驱动的触发器
 
-`Area2D` is for overlap-only. The signals:
+`Area2D` 仅用于 overlap-only。信号:
 
 ```gdscript
 # On Area2D node
-signal_pairs = {
-    "area_entered": "another Area2D entered me",
-    "area_exited":  "another Area2D left me",
-    "body_entered": "a CharacterBody2D / RigidBody2D / TileMap entered me",
-    "body_exited":  "a body left me",
-}
-# On CollisionObject2D (any body)
-"area_entered": "an Area2D entered this body",
+area_entered(area: Area2D)         # 另一个 Area2D 进入
+area_exited(area: Area2D)          # 另一个 Area2D 离开
+body_entered(body: Node2D)         # CharacterBody2D / RigidBody2D / TileMap 进入
+body_exited(body: Node2D)          # body 离开
+
+# On any CollisionObject2D
+area_entered(area: Area2D)         # 一个 Area2D 进入 THIS body
 ```
 
-Connect in code or via the editor's Signals panel. Type the signal parameter so the editor catches errors:
+代码或编辑器 Signals 面板连接。给信号参数加类型让编辑器抓错:
 
 ```gdscript
-func _on_pickup_area_body_entered(body: Node2D) -> void:
+func _on_pickup_body_entered(body: Node2D) -> void:
     if body.is_in_group("player"):
-        body.add_coin()
+        body.add_coin(1)
         queue_free()
 ```
 
-For damage zones, use a `Timer` to throttle: the zone shouldn't fire every frame the body is inside.
+伤害区用 `Timer` 节流:区不应该每帧都触发 body 在内的时候。
 
-## 4. CharacterBody2D movement template
+## 4. CharacterBody2D 移动模板
 
 ```gdscript
 extends CharacterBody2D
@@ -103,73 +101,72 @@ func _physics_process(_delta: float) -> void:
     move_and_slide()
 ```
 
-`move_and_slide` moves the body, applies velocity, and slides along walls. Returns `true` if the body collided. `is_on_floor()` reads the last collision's floor flag.
+`move_and_slide` 移动 body,应用速度,沿墙滑。发生任何 slide 返回 `true`。`is_on_floor()` 读最后一次碰撞的 floor 标志。
 
-**Use `_physics_process`, not `_process`** for any movement. Physics ticks at `physics_fps` (default 60). Variable timestep `_process` causes frame-rate-dependent physics.
+**用 `_physics_process` 而非 `_process`** 处理移动。物理以 `physics_fps` tick(默认 60)。变时间步长 `_process` 会导致帧率相关物理。
 
-**`move_and_slide` vs collision-query patterns** (Godot 4):
-- `move_and_slide()` — slide along walls; keep moving along velocity. Returns `true` if any slide occurred. Default for players / NPCs.
-- For projectile / one-shot patterns, call `move_and_slide()` once, then iterate `get_slide_collision_count()` / `get_slide_collision(i)` to read the `KinematicCollision2D`.
-- `test_move(motion)` — non-destructive test (does not actually move the body). Use for "would I collide if I moved by X?" checks.
-- **Note**: CharacterBody2D has **no** `move_and_collide` (that was Godot 3 KinematicBody2D). Use `move_and_slide` + `get_slide_collision` instead.
+## 5. `_physics_process` 中重构 motion 计算
 
-## 5. Top-down 2D movement (no gravity, no floor)
+**反模式**:玩家逻辑、敌人 AI 写满 `_physics_process` 且不可测。
 
-Z-2 is a top-down auto-chess; pieces don't fall. Drop the gravity / jump logic:
+**正确**:抽成纯函数,GUT 测:
 
 ```gdscript
-extends CharacterBody2D
-const SPEED := 220.0
+# In player.gd
+static func compute_motion(
+    prev_velocity: Vector2,
+    input_dir: float,
+    grounded: bool,
+    delta: float,
+    max_speed: float,
+    acceleration: float,
+    friction: float,
+    jump_velocity: float,
+    gravity: float
+) -> PlayerMotionOutput:
+    # 纯逻辑 — 不调引擎 API, 不访问节点
+    ...
 
-func _physics_process(_delta: float) -> void:
-    var dir := Input.get_vector(&"move_left", &"move_right", &"move_up", &"move_down")
-    velocity = dir * SPEED
+func _physics_process(delta: float) -> void:
+    var motion := compute_motion(velocity, input_dir, is_on_floor(), delta, ...)
+    velocity = motion.linear_velocity
     move_and_slide()
 ```
 
-That's it. No `is_on_floor` checks, no gravity.
+## 6. 拖拽命中测试
 
-## 6. Drag hit-test with Area2D `input_event` (replaces custom `hit_radius`)
+对棋盘 / 卡牌:玩家拖一张卡到目标格。
 
-The Z-2 board currently uses a custom `hit_radius` field on `Piece` and an `Area2D`-less manual loop. Replace with `Area2D` on each piece:
+**不要** 用 `get_node` 或 `_input` + `Control.get_global_rect().has_point()`。这些不走 2D 世界。
 
-```gdscript
-# On each piece (Node2D + Area2D + CollisionShape2D)
-@onready var area: Area2D = $Area2D
+**正确**:每张卡 / 每个棋盘格子有自己的 `Area2D` + `CollisionShape2D`。信号驱动:
 
-func _ready() -> void:
-    area.input_event.connect(_on_input_event)
+- `area_entered(area)` / `area_exited` — 卡进入 / 离开格子
+- `input_event(viewport, event, shape_idx)` — 直接在 Area2D 上点击
 
-func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
-    if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-        # 通知 Battle 拖拽这个 piece
-        battle.begin_drag(self, event.position)
-```
+这给你空间查询,包括旋转和形状精度(矩形 / 圆 / 胶囊)。
 
-**Why better than custom `hit_radius`**:
-- `Area2D` does its own spatial query, including rotation and shape precision (Rectangle / Circle / Capsule)
-- Multiple `Area2D`s can be on a single piece (e.g. clickable body + larger "selection range")
-- The `CollisionShape2D` is the visual + clickable; no separate `hit_radius` field to keep in sync
+多个 `Area2D` 可在同一物体上(例如可点击 body + 较大「选择范围」)。
 
-Trade-off: each piece gets a CollisionShape2D, which adds a tiny CPU cost per spatial query. For 10-50 pieces on a 9×9 board, this is negligible.
+权衡:每件多一个 CollisionShape2D,空间查询略增 CPU。对 9×9 棋盘 50 个格子可忽略。
 
-## 7. CollisionShape2D choice
+## 7. CollisionShape2D 选择
 
-| Shape | Use | Notes |
-|---|---|---|
-| `RectangleShape2D` | axis-aligned boxes (cards, walls) | cheapest |
-| `CircleShape2D` | round things (coins, orbs) | rotation-invariant; great for click hitboxes |
-| `CapsuleShape2D` | characters with height (platformer) | 2D analog of capsule |
-| `SegmentShape2D` | thin lines (platform edges, sword arc) | 1D collision |
-| `WorldBoundaryShape2D` | infinite plane (floor, walls of arena) | only StaticBody2D |
-| `ConvexPolygonShape2D` | irregular shapes | up to 8 vertices; use `CollisionPolygon2D` for child-defined points |
-| `SeparationRayShape2D` | 1D raycast | CharacterBody2D only, for "is there a wall in front of me" |
+| 形状 | 用途 | 注意 |
+|-------|------|------|
+| `RectangleShape2D` | 矩形(卡、墙) | 最便宜 |
+| `CircleShape2D` | 圆形(金币、球) | 旋转不变;鼠标点击 hitbox 好 |
+| `CapsuleShape2D` | 有身高角色(平台跳跃) | 2D 版的胶囊 |
+| `SegmentShape2D` | 细线(平台边缘、剑弧) | 1D 碰撞 |
+| `WorldBoundaryShape2D` | 无限平面(地板、竞技场墙) | 仅 `StaticBody2D` |
+| `ConvexPolygonShape2D` | 不规则形状 | 最多 8 顶点;子节点定义点用 `CollisionPolygon2D` |
+| `SeparationRayShape2D` | 1D 射线 | 仅 `CharacterBody2D`,用于「前面有墙吗」 |
 
-For a top-down 2D piece: `CircleShape2D` with radius matching visual extent.
+俯视 2D 棋子:`CircleShape2D` 半径匹配视觉范围。
 
-## 8. Layer-bit naming convention
+## 8. 层位命名约定
 
-In an autoload (`layer_names.gd` or similar):
+在 autoload(`layer_names.gd` 或类似):
 
 ```gdscript
 const LAYER_PLAYER     := 1 << 0   # 1
@@ -182,62 +179,63 @@ const LAYER_VISION     := 1 << 6   # 64  (AI sees you)
 const LAYER_PREDICTION := 1 << 7   # 128 (ghost bodies, ignored by gameplay)
 ```
 
-Reference by constant, not by raw number. The editor also has a bitfield editor (top of any CollisionObject2D inspector) where you tick bits by name if you set the project's layer names in **Project Settings → Layer Names → 2D Physics**.
+用常量而不是裸数字。编辑器也有位域编辑器(任何 CollisionObject2D inspector 顶部),若在 **Project Settings → Layer Names → 2D Physics** 设了层名,可以按名勾选。
 
-## 9. `physics_fps` tuning
+## 9. `physics_fps` 调优
 
-Default 60. Lower for slow sims (RTS, large worlds) to save CPU; raise for fighting games (frame-perfect hits).
+默认 60。需要慢模拟(RTS、大世界)省 CPU 降到;格斗游戏(帧精确命中)提高。
 
 ```ini
 [physics]
 common/physics_fps = 60
 ```
 
-Tied to `_physics_process` interval. If you set `physics_fps = 30`, `_physics_process(delta)` receives `delta ≈ 0.0333`. Velocity-driven movement scales correctly (multiply by delta), so 30 Hz physics doesn't slow the world.
+与 `_physics_process` 间隔挂钩。设 `physics_fps = 30`,`_physics_process(delta)` 收 `delta ≈ 0.0333`。速度驱动的移动正确缩放(乘 delta),所以 30 Hz 物理不会让世界变慢。
 
-**Anti-pattern**: setting `physics_fps = 1000` to "fix" jitter. The fix is in your code (smoothing, sub-stepping). 1000 Hz burns CPU for nothing.
+**反模式**:设 `physics_fps = 1000` 想「修抖动」。修在代码里(平滑、子步)。1000 Hz 烧 CPU 没收益。
 
-## 10. `_process` vs `_physics_process` — when each
+## 10. `_process` vs `_physics_process` — 何时用哪个
 
-| Use | Where |
-|---|---|
-| Movement (`move_and_slide`, `move_and_collide`) | `_physics_process` |
-| Reading physics state (collisions, overlaps) | `_physics_process` (or signals from Area2D / body) |
-| Visual interpolation (smooth between physics ticks) | `_process` |
-| AI decisions (targeting, pathing) | either; `_process` for smoother, `_physics_process` for tick-aligned |
-| Input response | `_process` or `_unhandled_input` |
-| Tween animations | `_process` (or via `Tween` autoplay) |
+| 用途 | 在哪 |
+|-------|---------|
+| 移动(`move_and_slide`、`move_and_collide`) | `_physics_process` |
+| 读物理状态(碰撞、重叠) | `_physics_process`(或 Area2D / body 的信号) |
+| 视觉插值(物理 tick 间平滑) | `_process` |
+| AI 决策(目标、寻路) | 任一;`_process` 更平滑,`_physics_process` 与 tick 对齐 |
+| 输入响应 | `_process` 或 `_unhandled_input` |
+| Tween 动画 | `_process`(或通过 Tween autoplay) |
 
-Mix them when needed: a CharacterBody moves in `_physics_process`, but its sprite smoothly interpolates in `_process` between physics ticks for high-Hz visuals.
+需要时混用:CharacterBody 在 `_physics_process` 移动,sprite 在 `_process` 在物理 tick 间平滑插值,用于高 Hz 视觉。
 
-## Common bug patterns
+## 常见 bug 模式
 
-| Symptom | Root cause | Rule |
-|---|---|---|
-| Player falls through floor | `collision_mask` doesn't include `LAYER_WORLD` | 2 |
-| `area_entered` never fires | `monitoring` off, or both bodies on same layer not in each other's mask | 2 + 3 |
-| `move_and_slide` doesn't move | velocity is zero, or `freeze` / `freeze_mode` set | 4 |
-| Wall sliding doesn't work | `slide_on_ceiling = false`, or wall's normal edge is unreachable | 4 |
-| Body jittery on slopes | `up_direction` is wrong, or `floor_max_angle` too small | 4 |
-| Drag still misses clicks | `Area2D` has no `CollisionShape2D`, or shape is at wrong position | 6 + 7 |
-| Bodies collide with everything | `collision_mask` = 0xFFFFFFFF (all bits set) | 2 |
-| Area2D detects self | `monitorable = true` and own body is on a watched layer | 2 |
+| 症状 | 根因 | 规则 |
+|------|------|------|
+| 玩家掉穿地板 | `collision_mask` 不含 `LAYER_WORLD` | 2 |
+| `area_entered` 从不触发 | `monitoring` 关,或两个 body 同层且不在对方 mask | 2 + 3 |
+| `move_and_slide` 不动 | 速度为 0,或 `freeze` / `freeze_mode` 已被设 | 4 |
+| 沿墙滑不工作 | `slide_on_ceiling = false`,或墙法线边缘不可达 | 4 |
+| 在斜坡上抖动 | `up_direction` 错,或 `floor_max_angle` 太小 | 4 |
+| 拖拽仍漏点击 | `Area2D` 没 `CollisionShape2D`,或形状位置错 | 6 + 7 |
+| Body 与一切碰撞 | `collision_mask = 0xFFFFFFFF`(所有位) | 2 |
+| Area2D 检测自身 | `monitorable = true` 且自身 body 在被观察的层 | 2 |
 
-## Reference index
+## 参考索引
 
-- `references/body-decision.md` — 4 body types, full comparison with code templates
-- `references/collision-layers.md` — 32-bit layer bits, common project layouts
-- `references/area-signals.md` — Area2D signal matrix, trigger pattern cookbook
+- `references/body-decision.md` — 4 种 body 类型,完整对比与代码模板
+- `references/collision-layers.md` — 32 位层位、常见项目布局
+- `references/area-signals.md` — Area2D 信号矩阵、触发器模式 cookbook
 
-## Output contract
+## 输出契约
 
-Read-only knowledge. Apply the rules when writing / fixing Godot 2D physics code. Don't generate new skills; don't run scripts; don't modify files outside the active Godot project.
+只读知识。在写 / 修 Godot 2D 物理代码时应用规则。不要生成新 skill;不要跑脚本;不要修改活动 Godot 项目外的文件。
 
-## Failure handling
+## 失败处理
 
-If a physics bug doesn't match any rule above, the bug is either:
-- Layer/mask misconfiguration (Rule 2) — print `print(self.collision_layer, " ", self.collision_mask)` and the other body
-- Shape geometry wrong (Rule 7) — visualize `CollisionShape2D` in the editor with "Visible Collision Shapes" on
-- Custom code driving motion wrong (Rule 4 / 5) — print `position` before / after `move_and_slide`
+如果物理 bug 不匹配上述任一规则,bug 要么是:
 
-If still stuck, fall back to the four diagnostics in `references/body-decision.md`.
+- 层 / mask 配置错(规则 2)— `print(self.collision_layer, " ", self.collision_mask)` 以及对方 body
+- 形状几何错(规则 7)— 在编辑器开启「Visible Collision Shapes」可视化 `CollisionShape2D`
+- 自定义代码驱动 motion 错(规则 4 / 5)— 在 `move_and_slide` 前后 `print(position)`
+
+还卡住的话,回退到 `references/body-decision.md` 里的四个诊断。

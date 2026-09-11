@@ -1,12 +1,12 @@
 ---
 name: prototype-loop
-description: Use when user has a GDD-approved core loop and wants to validate "feel" before committing to full implementation, or says "原型" / "试一下感觉" / "playtest this". Godot 2D-specific: bare scene, minimal art, script-driven verification, time-boxed iteration.
+description: "当用户已批准 GDD 的核心循环,想在全面实现前验证"手感",或说"原型"/"试一下感觉"/"playtest this"时使用。Godot 2D 专项:极简场景、极简美术、脚本驱动验证、时间盒迭代。"
 last_reviewed: 2026-09-10
 ---
 
 <!-- argument-hint: [core-loop | mechanic | full-game] -->
 
-# Prototype Loop (2D Godot)
+# 原型循环 (2D Godot)
 
 > 验证**核心循环是否好玩**的工作流。不是写"完整游戏",而是写"最小可玩切片"。
 > 走完本技能,产出"能跑 2 分钟、让人知道这游戏大致感觉"的 `prototype.tscn`。

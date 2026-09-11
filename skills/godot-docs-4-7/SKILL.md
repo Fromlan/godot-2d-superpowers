@@ -1,47 +1,46 @@
 ---
 name: godot-docs-4-7
-description: "Godot 4.7 conventions and API patterns. Use when asking about Godot/GDScript, scene composition, signals, CharacterBody vs RigidBody, InputMap, @export/@onready/@rpc, Forward+/GI, AnimationTree/Tween, shaders, multiplayer, or export/plugin."
+description: "Godot 4.7 约定与 API 模式。Use when 问到 Godot/GDScript、场景组合、信号、CharacterBody vs RigidBody、InputMap、@export/@onready/@rpc、Forward+/GI、AnimationTree/Tween、shader、多人、导出/插件。"
 last_reviewed: 2026-09-10
 ---
 
 <!-- argument-hint: [topic, framework name, or chapter number, e.g. 'signal', '@rpc', 'CharacterBody3D', 'ch07'] -->
 
-# Godot Docs 4.7 (Distilled Reference)
-**Author**: Godot Engine contributors (community-driven, MIT) | **Pages**: ~1,679 spine items | **Chapters**: 12 (topical) | **Generated**: 2026-08-01
+# Godot 文档 4.7 (蒸馏参考)
+**作者**:Godot Engine 贡献者(社区驱动,MIT)|**页数**:~1,679 spine items |**章节**:12 个主题 |**生成时间**:2026-08-01
 
-## How to Use This Skill
+## 怎么用这个 skill
 
-1. Map the question via **Topic Index** (or Chapter Index / cheatsheet / patterns / glossary).
-2. **Before answering**: read every matched chapter file; for yes/no or matrix decisions also read [cheatsheet.md](cheatsheet.md); for recipes read [patterns.md](patterns.md).
-3. **Done only when** those files have been read and the answer cites the relevant framework (Core alone is not enough when a Topic Index hit exists).
+1. 用 **Topic Index**(或 Chapter Index / cheatsheet / patterns / glossary)映射问题。
+2. **回答前**:读完所有匹配的章节文件;yes/no 或矩阵决策也读 [cheatsheet.md](cheatsheet.md);recipe 类读 [patterns.md](patterns.md)。
+3. **完成条件**:已读完那些文件,答案引用了相关 framework(仅 Core 不够)。
 
-Browse: ask for chapter list, `cheatsheet`, `patterns`, or `glossary`.
+浏览:请求章节列表、`cheatsheet`、`patterns` 或 `glossary`。
 
-last_reviewed: 2026-09-10
----
+## Core Frameworks & 心智模型
 
-## Core Frameworks
-
-See [references/core-frameworks.md](references/core-frameworks.md) for the 15 most-used Godot 4.7 frameworks (composition, signals, action-based input, static typing, @export/@onready, renderer choice, body matrix, multiplayer @rpc, Resources, persistence, Tween, WorldEnvironment, @tool, autoloads, headless CI).
+详见 [references/core-frameworks.md](references/core-frameworks.md),涵盖 Godot 4.7 15 个最常用的框架:组合优于继承、信号、action-based 输入、静态类型、@export/@onready、renderer 选择、body 矩阵、多人 @rpc、Resources、user:// 持久化、Tween、WorldEnvironment、@tool、autoload 边界、headless CI。
 
 ## Chapter Index
 
-| # | Title | Key Frameworks |
-|---|-------|----------------|
-| [ch01](chapters/ch01-introduction-and-philosophy.md) | Introduction & Design Philosophy | Scene/Node/Tree composition, signals, all-inclusive package |
-| [ch02](chapters/ch02-step-by-step-first-2d-3d.md) | Step-by-Step: First 2D / 3D Game | Player + Mob + Main + HUD skeleton; `@onready` & InputMap |
-| [ch03](chapters/ch03-gdscript-overview.md) | GDScript Overview & Language Reference | Static typing, `@export` / `@onready` / `@rpc`, `class_name` |
-| [ch04](chapters/ch04-signals-resources-scenes.md) | Signals, Resources & Scenes | Signal flags, `Resource`, `PackedScene.instantiate()` |
-| [ch05](chapters/ch05-best-practices.md) | Best Practices & Project Workflow | Autoloads, file conventions, VCS `.gitignore` |
-| [ch06](chapters/ch06-2d-graphics-physics.md) | 2D Graphics, Tools & Physics | CanvasItem, TileMap, CharacterBody2D, layers/masks |
-| [ch07](chapters/ch07-3d-graphics-physics.md) | 3D Graphics, Tools & Physics | Forward+/Mobile/Compatibility, NavigationAgent3D, LightmapGI |
-| [ch08](chapters/ch08-shaders-audio-animation.md) | Shaders, Audio, Animation | `.gdshader`, AudioBus, AnimationTree/StateMachine, Tween |
-| [ch09](chapters/ch09-rendering-materials.md) | Rendering, Materials & Lighting | WorldEnvironment, GI modes, SubViewport, LOD |
-| [ch10](chapters/ch10-inputs-ui-tween.md) | Inputs, UI (Control), Tween | InputMap actions, Container layout, Tween chains |
-| [ch11](chapters/ch11-networking-files.md) | Networking, Multiplayer & Files | `@rpc`, Spawner/Synchronizer, FileAccess, uid:// |
-| [ch12](chapters/ch12-editor-export-plugin.md) | Editor, Exporting, Plugins & Debugging | EditorPlugin, `--export-pack`, `@tool`, performance monitor |
+| # | 标题 | 关键框架 |
+|---|-------|----------|
+| [ch01](chapters/ch01-introduction-and-philosophy.md) | 介绍与设计哲学 | Scene/Node/Tree 组合、信号、all-inclusive package |
+| [ch02](chapters/ch02-step-by-step-first-2d-3d.md) | 逐步:第一个 2D / 3D 游戏 | Player + Mob + Main + HUD 骨架;@onready & InputMap |
+| [ch03](chapters/ch03-gdscript-overview.md) | GDScript 概述与语言参考 | 静态类型、@export / @onready / @rpc、class_name |
+| [ch04](chapters/ch04-signals-resources-scenes.md) | 信号、资源与场景 | Signal flags、Resource、PackedScene.instantiate() |
+| [ch05](chapters/ch05-best-practices.md) | 最佳实践与项目工作流 | Autoload、文件约定、VCS `.gitignore` |
+| [ch06](chapters/ch06-2d-graphics-physics.md) | 2D 图形、工具与物理 | CanvasItem、TileMap、CharacterBody2D、layers/masks |
+| [ch07](chapters/ch07-3d-graphics-physics.md) | 3D 图形、工具与物理 | Forward+/Mobile/Compatibility、NavigationAgent3D、LightmapGI |
+| [ch08](chapters/ch08-shaders-audio-animation.md) | Shader、音频、动画 | .gdshader、AudioBus、AnimationTree/StateMachine、Tween |
+| [ch09](chapters/ch09-rendering-materials.md) | 渲染、材质与光照 | WorldEnvironment、GI 模式、SubViewport、LOD |
+| [ch10](chapters/ch10-inputs-ui-tween.md) | 输入、UI (Control)、Tween | InputMap actions、Container 布局、Tween 链 |
+| [ch11](chapters/ch11-networking-files.md) | 多人、文件 | @rpc、Spawner/Synchronizer、FileAccess、uid:// |
+| [ch12](chapters/ch12-editor-export-plugin.md) | 编辑器、导出、插件与调试 | EditorPlugin、--export-pack、@tool、performance monitor |
 
 ## Topic Index
+
+所有 Topic 链接文件名保留英文(ch01-ch12 + glossary / cheatsheet / patterns 等)。简要说明:
 
 - **2D body** → ch06
 - **3D body** → ch07
@@ -74,7 +73,7 @@ See [references/core-frameworks.md](references/core-frameworks.md) for the 15 mo
 - **JSON save** → ch11
 - **`LightmapGI`** → ch09
 - **Material override** → ch09
-- **Mobile renderer** → ch07
+- **Mobile renderer** → ch07, ch09
 - **MultiplayerSpawner** → ch11
 - **MultiplayerSynchronizer** → ch11
 - **`move_and_slide`** → ch06, ch07
@@ -102,19 +101,12 @@ See [references/core-frameworks.md](references/core-frameworks.md) for the 15 mo
 - **`VoxelGI`** → ch09
 - **WorldEnvironment** → ch09
 
-## Supporting Files
+## 辅助文件
 
-- [glossary.md](glossary.md) — every key term, alphabetized (Ch references)
-- [patterns.md](patterns.md) — 15 reusable recipes with trade-offs
-- [cheatsheet.md](cheatsheet.md) — body decision matrix, layer-bit convention, anti-pattern table, tells-and-smells
+- [glossary.md](glossary.md) — 每个关键术语按字母排序(Ch 引用)
+- [patterns.md](patterns.md) — 15 个可复用 recipe 含权衡
+- [cheatsheet.md](cheatsheet.md) — body 决策矩阵、layer-bit 约定、反模式表、tells-and-smells
 
-## Scope & Limits
+## 作用域与限制
 
-This skill covers **Godot 4.7 reference**. It is **engine-oriented** — it
-does not include project-specific business logic, asset pipelines, or
-custom editor tooling from your codebase. When the question drifts into
-your project's specifics, combine with project tools, the project's own
-CLAUDE.md, and live runtime inspection. For topics *beyond* this distil
-(e.g. mobile platform signing, Steam integration, console SDKs), check
-the official docs at https://docs.godotengine.org or the relevant
-vendor guide.
+此 skill 覆盖 **Godot 4.7 参考**。它是 **引擎导向** — 不含项目特定业务逻辑、资源管线、或自定义编辑器工具。当问题漂移到你项目的细节,结合项目工具、项目的 CLAUDE.md、运行时检视。对 *本蒸馏外* 的内容(如移动平台签名、Steam 集成、主机 SDK),查官方文档 https://docs.godotengine.org 或相关供应商指南。

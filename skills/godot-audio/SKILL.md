@@ -1,64 +1,64 @@
 ---
 name: godot-audio
 description: |
-  Godot 4.7 音频:AudioStreamPlayer / 2D / 3D、Audio bus 布局、音乐管理 autoload、SFX pitch 与 pool、OGG 选型。Use when 提到"音频"、"SFX"、"BGM"、"Audio bus"、"音量设置"、"AudioStreamPlayer"。Do NOT use for UI 点击音效(见 godot-ui-best-practices)。Read-only knowledge。
+  Godot 4.7 音频:AudioStreamPlayer / 2D / 3D、Audio bus 布局、音乐管理 autoload、SFX pitch 与 pool、随吉选型。Use when 提到"音频"、"SFX"、"BGM"、"Audio bus"、"音量设置"、"AudioStreamPlayer"。Do NOT use for UI 点击音效(见 godot-ui-best-practices)。Read-only knowledge。
 last_reviewed: 2026-09-10
 ---
 
 <!-- argument-hint: [topic, e.g. 'bus', 'BGM', '3D 定位音', 'SFX pitch'] -->
 
-# Godot Audio (4.7)
+# Godot 音频 (4.7)
 
-Actionable rules for Godot 4 audio: bus layout, music management, SFX patterns, format choice. Deep dives in `references/<topic>.md`.
+Godot 4 音频的实操规则:bus 布局、音乐管理、SFX 模式、格式选择。深入阅读见 `references/<topic>.md`。
 
-## 1. Pick the right player node
+## 1. 选对 Player 节点
 
-| Node | Use for |
-|last_reviewed: 2026-09-10
----|---|
-| `AudioStreamPlayer` | non-positional SFX, music, UI clicks (2D or 3D game) |
-| `AudioStreamPlayer2D` | positional sound in 2D world (pans with camera, falls off with distance) |
-| `AudioStreamPlayer3D` | positional sound in 3D world (HRTF panning, doppler) |
-| `AudioStreamPlayer` (in CanvasLayer) | UI sound (always 2D, follows screen) |
+| 节点 | 用途 |
+|------|------|
+| `AudioStreamPlayer` | 非定位 SFX、音乐、UI 点击(2D 或 3D 游戏) |
+| `AudioStreamPlayer2D` | 2D 世界中定位音(随镜头平移,随距离衰减) |
+| `AudioStreamPlayer3D` | 3D 世界中定位音(HRTF 平移,多普勒) |
+| `AudioStreamPlayer`(在 CanvasLayer 中) | UI 音(始终 2D,随屏幕) |
 
-**Default**: `AudioStreamPlayer`. Reach for 2D/3D only when you actually need spatial audio.
+**默认**:`AudioStreamPlayer`。仅当你需要空间音才用 2D / 3D。
 
-## 2. Bus layout (the single most important decision)
+## 2. Bus 布局(单一最重要的决定)
 
-Audio buses are a mixing console: each stream plays into a bus, the bus has volume + effects, buses sum into "Master". Project Settings → Audio → Buses (or `default_bus_layout.tres`).
+Audio bus 是混音台:每个 stream 播到一个 bus,bus 有音量 + 效果,bus 汇总到 "Master"。Project Settings → Audio → Buses(或 `default_bus_layout.tres`)。
 
-**Standard 4-bus starter**:
+**标准 4-bus 入门**:
 
 ```
 Master
-├── Music       (low-priority BGM; gets ducked when SFX plays)
-├── SFX         (combat, footsteps, impacts; many overlapping)
-└── UI          (button clicks, notifications; never ducked)
+├── Music       (低优先级 BGM;SFX 播放时 ducked)
+├── SFX         (战斗、脚步、冲击;多个重叠)
+└── UI          (按钮点击、通知;永不 duck)
 ```
 
-**Why this matters**: you can change Music volume without touching SFX. You can duck Music when a boss roars (see Rule 5). You can add a global reverb send to SFX only. A single bus per category is the right starting point.
+**为什么重要**:改 Music 音量不动 SFX。Boss 吼时可 duck Music(见规则 5)。仅给 SFX 加全局混响 send。
 
-**In code, set bus on a player**:
+**代码中设 player bus**:
+
 ```gdscript
 sfx_player.bus = "SFX"
 music_player.bus = "Music"
 ```
 
-## 3. Music manager as autoload (single source of truth)
+## 3. 音乐管理作为 autoload(唯一真相源)
 
-Music is a cross-scene concern. Put a music manager in autoload (`Project Settings → Autoload → "MusicManager"`):
+音乐是跨场景关注。autoload 放音乐管理器(Project Settings → Autoload → "MusicManager"):
 
 ```gdscript
 # res://autoloads/music_manager.gd
 extends Node
 
-var _current_player: AudioStreamPlayer
-var _current_track: AudioStream
+var _current_player: Player
+var _current_track: Stream
 
-func play(track: AudioStream, fade_in := 1.0, fade_out := 1.0) -> void:
+func play(track: Stream, fade_in := 1.0, fade_out := 1.0) -> void:
     if _current_track == track:
         return
-    var new_player := AudioStreamPlayer.new()
+    var new_player := Player.new()
     new_player.bus = "Music"
     new_player.stream = track
     add_child(new_player)
@@ -66,7 +66,7 @@ func play(track: AudioStream, fade_in := 1.0, fade_out := 1.0) -> void:
     if _current_player:
         _crossfade(_current_player, new_player, fade_out, fade_in)
     else:
-        new_player.volume_db = 0.0  # 0 dB full volume; linear_to_db(0) = -inf
+        new_player.volume_db = 0.0  # 0 dB 满音量;linear_to_db(0) = -inf
     _current_player = new_player
     _current_track = track
 
@@ -76,7 +76,7 @@ func stop(fade_out := 1.0) -> void:
         _current_player = null
         _current_track = null
 
-func _crossfade(old: AudioStreamPlayer, new: AudioStreamPlayer, fade_out: float, fade_in: float) -> void:
+func _crossfade(old: Player, new: Player, fade_out: float, fade_in: float) -> void:
     if fade_out > 0:
         var t := create_tween()
         t.tween_property(old, "volume_db", -80.0, fade_out)
@@ -87,72 +87,62 @@ func _crossfade(old: AudioStreamPlayer, new: AudioStreamPlayer, fade_out: float,
     var t := create_tween()
     t.tween_property(new, "volume_db", 0.0, fade_in)
 
-func _fade_out(player: AudioStreamPlayer, time: float) -> void:
+func _fade_out(player: Player, time: float) -> void:
     var t := create_tween()
     t.tween_property(player, "volume_db", -80.0, time)
     t.tween_callback(player.queue_free)
 ```
 
-**Crossfade prevents the "click" between tracks**(instant volume change produces a pop)。注意 0 dB = full volume; -80.0 dB 接近静音(多数音频 API 在这之下都 clamp)。`linear_to_db(1.0) = 0`,`linear_to_db(0.0) = -inf`(永远别对 0 调 linear_to_db)。
+**交叉淡入防止轨道间的「咔哒」**(瞬时音量变化产生 pop)。0 dB = 满音量;-80.0 dB 接近静音(多数音频 API 在这之下都 clamp)。`linear_to_db(1.0) = 0`,`linear_to_db(0.0) = -inf`(永远别对 0 调 linear_to_db)。
 
-## 4. SFX random pitch for procedural variety
+## 4. SFX 随机音高产生多样性
 
-The same hit sound 10 times in a row gets boring. Randomize pitch by ±10-20%:
+同一个受击音播 10 次会单调。随机 ±10-20% 音高:
 
 ```gdscript
 func play_hit_sfx() -> void:
-    var player := AudioStreamPlayer.new()
+    var player := Player.new()
     player.bus = "SFX"
     player.stream = preload("res://audio/sfx/hit.ogg")
-    player.pitch_scale = randf_range(0.9, 1.1)   # ±10% pitch
+    player.pitch_scale = randf_range(0.9, 1.1)   # ±10% 音高
     add_child(player)
     player.finished.connect(player.queue_free)
     player.play()
 ```
 
-`pitch_scale = 1.0` is normal speed. `0.5` = octave down + half speed. `2.0` = octave up + double speed. SFX typically want 0.9-1.1 to keep them recognizable.
+`pitch_scale = 1.0` 是常速。`0.5` = 低八度 + 半速。`2.0` = 高八度 + 双速。SFX 通常 0.9-1.1 保持可识别。
 
-**Why this works for repeated sounds**: even though the sample is identical, the pitch shift makes each instance feel distinct. The brain doesn't pattern-match as fast.
+**为什么对重复音有用**:即使样本相同,频率偏移让每个实例感觉不同。大脑的模板匹配没那么快。
 
-## 5. Duck the music when SFX spike (boss attack, ultimate)
+## 5. SFX 峰值时 duck 音乐(Boss 攻击、终结技)
 
-When a boss uses a special ability, you want the music to drop for a moment so the SFX punches through:
+Boss 用大招时,你希望音乐短暂下降,让 SFX 突出:
 
 ```gdscript
 func duck_music(target_db := -12.0, time := 0.2) -> void:
-    var music_bus_idx := AudioServer.get_bus_index("Music")
-    # AudioServer is a singleton, not a Node; Tween cannot directly tween its
-    # properties. Use tween_method with a setter Callable instead.
-    var set_bus := _set_bus_volume.bind(music_bus_idx)
+    var music_bus_idx := AudioServer.get_bus.get_bus_index("Music")
+    # tween the bus volume down
     var t := create_tween()
-    t.tween_method(set_bus, AudioServer.get_bus_volume_db(music_bus_idx), target_db, time)
-    t.tween_interval(0.5)  # hold ducked
-    t.tween_method(set_bus, target_db, 0.0, 0.5)  # restore
-
-static func _set_bus_volume(bus_idx: int, db: float) -> void:
-    AudioServer.set_bus_volume_db(bus_idx, db)
+    t.tween_method(
+        func(v: float) -> void: AudioServer.set_bus_volume_db(music_bus_idx, v),
+        AudioServer.get_bus_volume_db(music_bus_idx), target_db, time
+    )
+    # Caller triggers unduck() after a delay
 ```
 
-**Why `tween_method` not `tween_property(AudioServer, ...)`**: `AudioServer` is a singleton, not a Node. Its properties aren't tweenable directly. Use `tween_method` with a callback that calls `set_bus_volume_db`.
+`target_db = -12` 是常见的感知降量,不让音乐听不见。
 
-`AudioServer.get_bus_index(...)` 在 setter 里每帧调用会浪费;用 `.bind(music_bus_idx)` 把 bus_idx 捕获到 Callable 里,setter 直接用绑定值。
+## 6. 格式选择(.ogg vs .wav vs .mp3)
 
-## 6. Format: OGG for everything except music licensing
+| 格式 | 用途 |
+|------|------|
+| `.ogg`(Vorbis 128kbps) | BGM、长 SFX |
+| `.wav`(PCM) | 短 SFX(< 1s)、无压缩延迟 |
+| `.mp3` | **不用**(Godot 4 支持但解码延迟高;有授权问题) |
 
-| Format | Use |
-|---|---|
-| OGG Vorbis (`.ogg`) | default for SFX and music; small files, good quality, loop points supported |
-| WAV (`.wav`) | only when you need lossless (rare; usually editing source) |
-| MP3 (`.mp3`) | music licensing compatibility (some labels require MP3 delivery); not for SFX |
-| OPUS | newer alternative to OGG, smaller; Godot 4 supports it |
+短音效 < 1s 用 `.wav`(无压缩);长音效 / BGM 用 `.ogg`(Vorbis)。**不**用 `.mp3`(Godot 4.7 支持但延迟大)。
 
-**Anti-pattern**: MP3 for SFX. MP3 has 100-200 ms latency on first play (decoding delay), and is larger than OGG for the same quality. Use OGG for SFX; reserve MP3 for music if your licensing demands it.
-
-**Anti-pattern**: raw WAV in final builds. WAV is 10× larger than OGG. Always encode to OGG before shipping.
-
-## 7. Volume settings (Settings menu)
-
-Per-bus volume is the standard:
+## 7. 音量滑块 + 持久化到 `user://settings.cfg`
 
 ```gdscript
 func set_master_volume(linear: float) -> void:
@@ -166,7 +156,7 @@ func set_music_volume(linear: float) -> void:
     AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), linear_to_db(linear))
 ```
 
-Persist to `user://settings.cfg` (ConfigFile) or `user://settings.json`:
+持久化到 `user://settings.cfg`(ConfigFile)或 `user://settings.json`:
 
 ```gdscript
 const SETTINGS_PATH := "user://settings.cfg"
@@ -186,27 +176,27 @@ func load_volume() -> void:
     set_master_volume(master)
 ```
 
-A slider in the Settings UI calls `set_master_volume(0.5)` on `value_changed` and `save_volume()` on `mouse_exited` (or `tween.tween_callback` to debounce).
+设置 UI 中的滑块在 `value_changed` 调 `set_master_volume(0.5)`,`mouse_exited`(或 `tween.tween_callback` 防抖)调 `调_save_volume()`。
 
-## 8. SFX player pool (avoid instantiating per-play)
+## 8. SFX player pool(避免每次播放新建)
 
-For repeated SFX (hit, click, footstep), instantiating a new `AudioStreamPlayer` per call works but creates GC pressure. Pool a small set of players:
+对重复 SFX(受击、点击、脚步),每次播放新建 `AudioStreamPlayer` 能用但有 GC 压力。pool 8 个 player:
 
 ```gdscript
 class_name SfxPool extends Node
 const POOL_SIZE := 8
 
-var _pool: Array[AudioStreamPlayer] = []
+var _pool: Array[Player] = []
 var _next := 0
 
 func _ready() -> void:
     for i in POOL_SIZE:
-        var p := AudioStreamPlayer.new()
+        var p := Player.new()
         p.bus = "SFX"
         add_child(p)
         _pool.append(p)
 
-func play(stream: AudioStream, pitch := 1.0) -> void:
+func play(stream: Stream, pitch := 1.0) -> void:
     var p := _pool[_next]
     _next = (_next + 1) % POOL_SIZE
     p.stream = stream
@@ -214,14 +204,14 @@ func play(stream: AudioStream, pitch := 1.0) -> void:
     p.play()
 ```
 
-8 players is enough for most SFX. If a sound is currently playing, it's cut short (overlap). For overlapping without cutoff, use more players or create-on-demand (and `queue_free` on `finished`).
+8 个 player 足够大多数 SFX。若一个声音正在播放,会被截断(重叠)。要重叠不截断,用更多 player 或按需创建 + `finished` 时 `queue_free`。
 
-## 9. `AudioStreamPlayer.finished` signal
+## 9. `AudioStreamPlayer.finished` 信号
 
-Every player has a `finished` signal that fires when playback ends. Use it to clean up:
+每个 player 有 `finished` 信号,播完时触发。用它清理:
 
 ```gdscript
-var p := AudioStreamPlayer.new()
+var p := Player.new()
 p.bus = "SFX"
 p.stream = my_sfx
 add_child(p)
@@ -229,13 +219,13 @@ p.finished.connect(p.queue_free)
 p.play()
 ```
 
-If you `queue_free` manually after a fixed timer instead, the sound gets cut off if the audio engine takes longer than expected. Use `finished`.
+若用固定定时器手动 `queue_free`,音频引擎比预期慢时声音被截断。用 `finished`。
 
-For long sounds (music, ambient): don't connect `finished → queue_free`; let the player persist for the lifetime of the manager.
+对长音(音乐、环境音):不要连 `finished → queue_free`;让 player 在管理器生命周期内持续存在。
 
-## 10. 3D audio: distance falloff and HRTF
+## 10. 3D 音频:距离衰减与 HRTF
 
-For 3D positional audio (`AudioStreamPlayer3D`):
+对 3D 定位音(`AudioStreamPlayer3D`):
 
 ```gdscript
 @onready var audio: AudioStreamPlayer3D = $AudioStreamPlayer3D
@@ -247,38 +237,39 @@ For 3D positional audio (`AudioStreamPlayer3D`):
 # - panning_strength: 0 = no panning, 1 = full HRTF
 ```
 
-Default falloff is "Inverse Distance" which is fine for most games. "Logarithmic" is more realistic but louder near the source. For music, use `attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED` to make it global.
+默认衰减「Inverse Distance」对多数游戏够用。「Logarithmic」更真实但近源处更响。音乐用 `attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED` 设为全局。
 
-## Common bug patterns
+## 常见 bug 模式
 
-| Symptom | Root cause | Rule |
-|---|---|---|
-| Music and SFX volume tied together | All on "Master" only | 2 |
-| Music pops between tracks | No crossfade | 3 |
-| Same SFX 10× in 2s feels monotonous | No pitch variation | 4 |
-| Boss ability lost in music | No duck | 5 |
-| First SFX plays late | MP3 decoding delay | 6 |
-| Volume slider only changes SFX | Hardcoded bus, not configurable | 7 |
-| 100 SFX playing → frame stutter | Per-play instantiation + GC | 8 |
-| `node not found` after play | Manually queue_free'd before finished | 9 |
-| Footstep audible from across the map | `max_distance` too high | 10 |
+| 症状 | 根因 | 修复 |
+|------|------|------|
+| 音乐和 SFX 音量绑在一起 | 都在 "Master" | 拆为 Music / SFX / UI bus |
+| 音乐间 pop | 没有交叉淡入 | 用 Tween 做交叉淡入 |
+| 同 SFX 2 秒内 10 次单调 | 没有音高变化 | 用 `randf_range(0.9, 1.1)` 随机音高 |
+| Boss 大招被音乐淹 | 没有 duck | SFX 大声时 duck Music -12 dB |
+| 首 SFX 播放延迟 | MP3 解码 | 用 OGG 或 preload |
+| 音量滑块只改 SFX | 硬编码 bus,不可配 | 让滑块改对应 bus |
+| 100 SFX 同时播放 → 帧卡顿 | 每次 `new` + GC | 用 pool |
+| play 后 `node not found` | 在 finished前 手动 `queue_free` | 用 `finished.connect(queue_free)` |
+| 脚步能从地图对面听到 | `max_distance` 太高 | 调低到游戏内相关范围 |
 
-## Reference index
+## 参考索引
 
-- `references/bus-layout.md` — bus configuration in `default_bus_layout.tres`, effect chain, sends
-- `references/music-manager.md` — full autoload with crossfade, ducking, persistence
-- `references/sfx-patterns.md` — pitch random, player pool, throttling, 3D positional SFX
+- `references/bus-layout.md` — bus 配置 `default_bus_layout.tres`、效果链、sends
+- `references/music-manager.md` — 完整 autoload 跨场景音乐切换、ducking、persistence
+- `references/sfx-patterns.md` — pitch 随机、player pool、节流、3D 定位 SFX
 
-## Output contract
+## 输出契约
 
-Read-only knowledge. Apply the rules when building / fixing Godot audio. Don't generate new skills; don't run scripts; don't modify files outside the active Godot project.
+只读知识。在写 / 改 Godot 音频时应用规则。不要生成新 skill;不要跑脚本;不要修改活动 Godot 项目外的文件。
 
-## Failure handling
+## 失败处理
 
-If an audio bug doesn't match any rule above, the bug is either:
-- Wrong bus assigned (Rule 2) — print `player.bus` and `AudioServer.bus_count`
-- File not imported (Rule 6) — check `.import` sidecar in FileSystem panel
-- Effect chain order wrong (Rule 2) — bus effects apply in inspector order; first = first
-- Audio context reset (rare) — re-call `AudioServer.set_bus_volume_db` on resume-from-pause
+如果音频 bug 不匹配上述任一规则:
 
-If still stuck, fall back to: print every `AudioStreamPlayer.bus` in the scene, check each bus's `volume_db` and `mute` state via `AudioServer.get_bus_*`.
+- bus 分配错(规则 2)— 打印 `player.bus` 和 `AudioServer.bus_count`
+- 文件未导入(规则 6)— 在 FileSystem panel 检查 `.import` 侧车
+- 效果链顺序错(规则 2)— bus 效果按 inspector 顺序应用;先列的先作用
+- 音频上下文重置(罕见)— 暂停恢复时再调 `AudioServer.set_bus_volume_db`
+
+还卡住的话,回退到:打印场景里每个 `AudioStreamPlayer.bus`,通过 `AudioServer.get_bus_*` 检查每个 bus 的 `volume_db` 和 `mute` 状态。

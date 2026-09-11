@@ -20,7 +20,8 @@
     .\scripts\lint-skills.ps1 -ProjectPath .
 #>
 param(
-    [string]$ProjectPath = "."
+    [string]$ProjectPath = ".",
+    [switch]$CheckLocaleRatio
 )
 
 $ErrorActionPreference = "Stop"
@@ -117,7 +118,30 @@ foreach ($sf in $skillFiles) {
     }
 }
 
+
+$localeRatioFail = 0
+if ($CheckLocaleRatio) {
+    Write-Step ""
+    Write-Step "Locale ratio check (CN char count)..." "Cyan"
+    foreach ($sf in $skillFiles) {
+        $rel = $sf.FullName.Substring($skillsRoot.Length + 1)
+        $contentFull = Get-Content -LiteralPath $sf.FullName -Raw -Encoding UTF8
+        $cn = ([regex]::Matches($contentFull, "[\u4e00-\u9fff]")).Count
+        $en = ([regex]::Matches($contentFull, "[A-Za-z]")).Count
+        $total = $cn + $en
+        $pct = if ($total -gt 0) { [int]($cn * 100 / $total) } else { 0 }
+        $status = if ($pct -ge 50) { "PASS" } else { "WARN" }
+        $color = if ($pct -ge 50) { "Green" } else { "Yellow" }
+        Write-Host ("{0,-50} CN={1,4} EN={2,5} {3,3}%" -f $rel, $cn, $en, $pct) -ForegroundColor $color
+        if ($pct -lt 50) { $localeRatioFail++ }
+    }
+}
+
 Write-Step ""
 Write-Step ("Summary: PASS={0}  FAIL={1}" -f $passCount, $failCount) $(if ($failCount -gt 0) { "Red" } else { "Green" })
+
+if ($CheckLocaleRatio) {
+    Write-Step ("Locale warnings (CN < 50%): {0}" -f $localeRatioFail) $(if ($localeRatioFail -gt 0) { "Yellow" } else { "Green" })
+}
 
 if ($failCount -gt 0) { exit 1 } else { exit 0 }

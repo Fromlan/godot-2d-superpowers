@@ -1,12 +1,12 @@
 ---
 name: systematic-debugging-2d
-description: Use when user reports a bug, performance issue, or unexpected behavior in a 2D Godot project, or says '有 bug' / '现象是...' / '帧率低' / '卡顿'. 4-phase root-cause process specialized for 2D physics, animation, and rendering issues.
+description: "当用户报告 2D Godot 项目中的 bug、性能问题或意外行为时使用,或说"有 bug"/"现象是..."/"帧率低"/"卡顿"。4 阶段根因分析流程,针对 2D 物理、动画、渲染问题专项。"
 last_reviewed: 2026-09-10
 ---
 
 <!-- argument-hint: [physics | animation | rendering | performance | logic] -->
 
-# Systematic Debugging 2D (Godot)
+# 系统化调试 2D (Godot)
 
 > 4 阶段根因分析,专门针对 2D Godot 常见问题类型。
 > 走完本技能,产出"症状 → 假设 → 验证 → 修复 → 防御"的完整链条。

@@ -5,36 +5,36 @@ description: |
 last_reviewed: 2026-09-10
 ---
 
-<!-- argument-hint: [rule number or symptom, e.g. '3', 'mouse_filter', 'drag 不触发'] -->
+<!-- argument-hint: [rule number or symptom, e.g. '3', 'mouse_filter', '拖 不触发'] -->
 
-# Godot UI Best Practices (4.7)
+# Godot UI 最佳实践 (4.7)
 
-Actionable rules for building Godot 4 Control / HUD UI. Each rule states the failure mode, the fix, and a one-liner code example. Deep dives live in `references/<topic>.md`.
+构建 Godot 4 Control / HUD UI 的实操规则。每条规则说明失败模式、修复、一句话代码片段。深入阅读见 `references/<topic>.md`。
 
-## 1. Container drives layout, not manual `position`
+## 1. Container 驱动布局,不用手写 `position`
 
-Every layout problem starts with the same mistake: child nodes with hardcoded `position` inside a `Container`. Containers are the engine; let them work.
+每个布局问题都源于同一个错:在 `Container` 里给子节点手写 `position`。Container 是引擎;让它工作。
 
-| Bad | Good |
-|last_reviewed: 2026-09-10
----|---|
-| 5 children with `position = Vector2(0, 60 * i)` inside a node | `VBoxContainer` with `theme_override_constants/separation = 8` |
-| 3 children with manual x/y inside a `Node2D` | `HBoxContainer` (or `GridContainer` for fixed columns) |
-| 4 corners of a popup manually placed | `MarginContainer` + `VBoxContainer` nested |
+| 坏 | 好 |
+|----|------|
+| 5 个子节点在 node 里 `position = Vector2(0, 60 * i)` | `VBoxContainer` + `theme_override_constants/separation = 8` |
+| 3 个子节点在 `Node2D` 里手写 x/y | `HBoxContainer`(或 `GridContainer` 用于固定列) |
+| 4 角 popup 手摆 | `MarginContainer` + `VBoxContainer` 嵌套 |
 
-`Container` types and when to use:
-- `VBoxContainer` / `HBoxContainer` — vertical/horizontal flow
-- `GridContainer` — fixed N×M grid
-- `MarginContainer` — uniform padding inside a parent
-- `CenterContainer` — single child centered
-- `PanelContainer` — auto-sizes to child + `content_margin_*` (see Rule 9)
-- `ScrollContainer` — auto scrollable area
+Container 类型与何时用:
 
-**Why**: manual `position` breaks the moment you change a font, add a child, or resize the window. Container rebuilds correctly.
+- `VBoxContainer` / `HBoxContainer` — 垂直 / 水平流
+- `GridContainer` — 固定 N×M 网格
+- `MarginContainer` — 父节点内部统一 padding
+- `CenterContainer` — 单子节点居中
+- `PanelContainer` — 自适应子节点 + `content_margin_*`(见规则 9)
+- `ScrollContainer` — 自滚动区
 
-## 2. `size_flags_*` for child fill/shrink behavior
+**为什么**:手写 `position` 在换字体、加子节点或调窗口大小时立刻坏。Container 自动重排。
 
-A `Container` lays out children; `size_flags_*` on each child tells it how. Defaults are wrong for HUD bars, headers, and dynamic content.
+## 2. `size_flags_*` 控制子节点 fill/shrink 行为
+
+`Container` 排子节点;每个子节点的 `size_flags_*` 告诉它怎么排。默认值对 HUD bar、header、动态内容是错的。
 
 ```gdscript
 # Expand fill horizontal + shrink end vertical — header bar pattern
@@ -42,18 +42,19 @@ header.size_flags_horizontal = Control.SIZE_EXPAND_FILL   # 1
 header.size_flags_vertical   = Control.SIZE_SHRINK_END   # 0
 ```
 
-Values: `0=SHRINK_END`, `1=FILL`, `2=EXPAND`, `3=EXPAND_FILL`. The combination of `EXPAND` (parent grows the slot) + `FILL` (child fills the slot) is the common "stretchy" case.
+值:`0=SHRINK_END`, `1=FILL`, `2=EXPAND`, `3=EXPAND_FILL`。`EXPAND`(父扩张该槽)+ `FILL`(子填满该槽)是常见的「可拉伸」组合。
 
-**Pitfall**: `PanelContainer` with a `VBoxContainer` child. If the `VBoxContainer` has default `size_flags_vertical = SIZE_FILL` (1), it tries to fill the parent. The `PanelContainer` then expands to fit the `VBoxContainer`. The result: panel grows past its `offset_bottom` and overflows into adjacent UI. **Fix**: set the inner `VBoxContainer.size_flags_vertical = 0` (SHRINK_END) so the panel uses its offset rect.
+**陷阱**:`PanelContainer` 套 `VBoxContainer` 子。如果内层 `VBoxContainer` 默认 `size_flags_vertical = SIZE_FILL`(1),它要填满父。`PanelContainer` 就扩展适配 `VBoxContainer`。结果:panel 长过 `offset_bottom`,溢进相邻 UI。**修复**:内层 `VBoxContainer.size_flags_vertical = 0`(SHRINK_END)让 panel 用 its offset rect。
 
-## 3. `mouse_filter` is the #1 cause of "click doesn't fire"
+## 3. `mouse_filter` 是「点击不触发」的头号原因
 
-Every `Control` has `mouse_filter`:
-- `STOP = 0` (default) — eats the event, doesn't pass to siblings or `_unhandled_input`
-- `PASS = 1` — sees the event, passes it to siblings + `_unhandled_input`
-- `IGNORE = 2` — invisible to mouse, event goes through completely
+每个 `Control` 有 `mouse_filter`:
 
-The **default STOP** means a decorative `Label` next to a game object (a piece, a card, a 3D prop) silently eats clicks before they reach the parent's `_unhandled_input`. This is the most common "drag doesn't work" cause.
+- `STOP = 0`(默认)— 吃掉事件,不传给兄弟或 `_unhandled_input`
+- `PASS = 1` — 看到事件,传给兄弟 + `_unhandled_input`
+- `IGNORE = 2` — 对鼠标不可见,事件完全穿过
+
+**默认 STOP** 意味着游戏物体旁边的装饰性 `Label` 会在 `_unhandled_input` 收到事件前静默吃掉点击。这是「拖拽不工作」最常见的原因。
 
 ```gdscript
 # 装饰性 Control 必须显式设 IGNORE, 否则吞掉点击
@@ -64,101 +65,102 @@ hp_bar.mouse_filter  = Control.MOUSE_FILTER_IGNORE   # 2
 button.mouse_filter  = Control.MOUSE_FILTER_STOP     # 0
 ```
 
-**Diagnose**: in `_unhandled_input` first line, `print(event.position, " ", event.pressed)`. If nothing prints on click, a `Control` above the game object is eating it. Set the suspect's `mouse_filter = 2`.
+**诊断**:在 `_unhandled_input` 第一行 `print(event.position, " ", event.pressed)`。如果没打印,某个 `Control` 在游戏物体上方吃掉了它。嫌疑节点设 `mouse_filter = 2`。
 
-## 4. Click event chain: `_input` → `_gui_input` → `_unhandled_input`
+## 4. 点击事件链:`_input` → `_gui_input` → `_unhandled_input`
 
-For UI buttons, **always** connect to `Button.pressed` signal. Don't poll for clicks in `_unhandled_input` to drive button actions.
+对 UI Button,**始终** 连 `Button.pressed` 信号。**不要**在轮轮在 `_unhandled_input` 里轮询点击驱动 button 动作。
 
 ```gdscript
-# Right — signal-driven
+# Right — 信号驱动式
 shop_buy_btn.pressed.connect(_on_shop_buy)
 
-# Wrong — polling for a Button click
+# Wrong — 轮询 Button 点击
 func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventMouseButton and event.pressed:
         if Rect2(shop_buy_btn.global_position, shop_buy_btn.size).has_point(event.position):
-            _on_shop_buy()  # duplicates Button's own logic, breaks with input devices
+            _on_shop_buy()  # 重复 Button 自身逻辑, 输入设备一换就坏
 ```
 
-Use `_unhandled_input` only for **game actions that aren't buttons**: drag, hotkey for game command, camera pan, etc. Even then, the actual game object hit-test is your job — `Container` doesn't help.
+`_unhandled_input` 仅用于游戏动作(不是按钮):拖拽、游戏命令热键、镜头平移等。即使如此,实际游戏对象的命中测试还是你来做 — `Container` 不帮忙。
 
 ## 5. `_input` vs `_unhandled_input` vs `_gui_input`
 
-| Hook | When it fires | Use for |
-|---|---|---|
-| `_input` | every event, before GUI processing | input recording / replay, debug overlays |
-| `_unhandled_input` | only events no `Control` consumed | game logic (drag, world click) |
-| `_gui_input` | only on hovered `Control` | per-control custom behavior (drag inside a `Panel`) |
+| Hook | 何时触发 | 用途 |
+|------|---------|------|
+| `_input` | 每个事件,GUI 处理前 | 输入录制 / 回放、调试覆盖 |
+| `_gui_input` | 仅 GUI Control | Control 脚本内部 |
+| `_unhandled_input` | GUI 未未处理的事件 | 游戏动作(不是 Button 点击) |
 
-Default game logic → `_unhandled_input`. Custom widget behavior → `_gui_input` on that widget.
+## 6. Tween 用于一次性视觉插值
 
-## 6. Tween for every one-shot visual interpolation
-
-Direct property assignment for "drag start highlight" or "menu open fade" is a no-op feel. Use `create_tween()`:
+对 UI / 镜头 / shader 脉冲用 `Tween` 而不是 `_process`:
 
 ```gdscript
-# Drag start: 80ms fade to bright + scale 1.15x
 var t := create_tween()
 t.set_parallel(true)
-t.tween_property(piece, "modulate", Color(1.4, 1.4, 1.0), 0.08)
-t.tween_property(piece, "scale",    Vector2.ONE * 1.15, 0.08)
-
-# Drag end: reverse
-t = create_tween()
-t.tween_property(piece, "modulate", Color.WHITE, 0.08)
-t.tween_property(piece, "scale",    Vector2.ONE, 0.08)
+t.tween_property(node, "modulate", Color.RED, 0.1)
+t.tween_property(node, "scale", Vector2.ONE * 1.2, 0.1)
+t.tween_interval(0.05)  # pause briefly
+t.tween_property(node, "modulate", Color.WHITE, 0.2)
+t.tween_callback(queue_free)
 ```
 
-Tweens pause on `SceneTree.paused = true` automatically — usually what you want. Cancel before `queue_free` if the target is an autoload-managed tween.
+详见 `godot-animation` 技能。
 
-## 7. Action-based input, not raw `KeyEvent`
+## 7. Button 状态 + 主题
 
-Define actions in **Project Settings → Input Map** ("ui_select", "drag_piece", "pause"). Bind keys + gamepad. Read with `Input.is_action_pressed(&"drag_piece")`. Polling raw `KEY_SPACE` blocks rebinding and gamepad forever.
+Button 有多个状态:normal、hover、pressed、disabled、focus。每个可以设不同 stylebox。
 
-For mouse-only games (most strategy), `_unhandled_input` with `InputEventMouseButton` is fine, but **define the action anyway** so rebinding is on the table.
+```gdscript
+# Apply at runtime
+var style := StyleBoxFlat.new()
+style.bg_color = Color(0.2, 0.4, 0.8)
+style.corner_radius_top_left = 8
+style.corner_radius_top_right = 8
+style.corner_radius_bottom_left = 8
+style.corner_radius_bottom_right = 8
+button.add_theme_stylebox_override("normal", style)
+button.add_theme_stylebox_override("hover", hover_style)
+button.add_theme_stylebox_override("pressed", pressed_style)
 
-## 8. CanvasLayer for HUD, not sibling Node2D
-
-HUD on the same layer as game objects means:
-- Drag-to-camera breaks HUD positions
-- Camera zoom scales the HUD too
-- Click priority is ambiguous (HUD on top? game on top?)
-
-Put HUD under a `CanvasLayer`:
-
-```
-Battle (Node2D)
-├── Board (Node2D)        ← game world
-├── Pieces (Node2D)       ← draggable game objects
-└── HUD (CanvasLayer)     ← always on top, unaffected by camera
-    ├── TopBar
-    ├── ShopPanel
-    └── BottomBar
+# Or use a Theme resource
+$Root.theme = preload("res://theme.tres")
 ```
 
-`CanvasLayer.layer` controls stacking order across layers. `layer=1` is above default.
+**不要**手动轮询 `button.is_pressed()` 然后再驱动状态。Button 自己处理所有状态。
 
-## 9. PanelContainer + StyleBox: respect `content_margin_*`
+## 8. CanvasLayer 用于 HUD
 
-When you theme a `PanelContainer` with a `StyleBoxFlat` and set `content_margin_left/right/top/bottom`, the panel auto-sizes around the child + margins. Don't also set `offset_*` to fight the margins.
+HUD 应该在 `CanvasLayer`(不参与世界变换),世界物体在 `Node2D`(参与变换):
 
-```ini
-[sub_resource type="StyleBoxFlat" id="panel"]
-bg_color = Color(0.1, 0.1, 0.1, 0.9)
-content_margin_left = 10.0
-content_margin_top = 10.0
-content_margin_right = 10.0
-content_margin_bottom = 10.0
+```
+Main (Node2D)
+├── World (Node2D)            # 跟随镜头
+│   ├── Player (CharacterBody2D)
+│   └── Enemies (Node2D)
+└── HUD (CanvasLayer)         # 屏幕固定
+    ├── HP (ProgressBar)
+    └── Score (Label)
 ```
 
-`Panel` (no Container suffix) does NOT auto-size. Use `PanelContainer` for HUD panels.
+CanvasLayer 让 HUD 不受相机移动 / 缩放影响。
 
-## 10. Viewport size must match design or content overflows
+## 9. PanelContainer + content_margin
 
-If your `.tscn` lays out for 1152×720 but `project.godot` doesn't pin viewport size, Godot uses its default (1152×648). Buttons in `y=672-704` will be cut off the bottom, and `get_viewport_rect().size` returns the actual size, not your design size.
+`PanelContainer` 自动 sizing 到 child。用 `content_margin_*` 加 padding:
 
-**Always set explicitly**:
+```gdscript
+var style := StyleBoxFlat.new()
+style.content_margin_left = 16
+style.content_margin_right = 16
+style.content_margin_top = 8
+style.content_margin_bottom = 8
+panel.add_theme_stylebox_override("panel", style)
+```
+
+## 10. viewport 大小 vs 设计大小
+
 ```ini
 [display]
 window/size/viewport_width=1152
@@ -167,47 +169,50 @@ window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 ```
 
-Verify on every layout change: print `get_viewport_rect().size` in `_ready()`.
+**始终显式设**。否则 viewport 大小可能与你设计的不匹配;在某些 viewport 上 HUD 被切底,`get_viewport_rect().size` 返回实际大小而不是你的设计大小。
 
-## 11. Anchor + offset, not absolute position, for resize-friendly UI
+每次布局变化验证:在 `_ready()` 打印 `get_viewport_rect().size`。
 
-Top-level HUD nodes that should "stick" to an edge:
-- Top bar: `anchor_left=0, anchor_right=1, anchor_top=0, offset_right=0` (full width, top)
-- Bottom bar: `anchor_left=0, anchor_right=1, anchor_bottom=1, offset_top=-X` (full width, X px from bottom)
-- Side panel: `anchor_left=1, anchor_right=1, anchor_top=0, anchor_bottom=1` (right edge, full height)
+## 11. Anchor + offset,不是绝对 position,用于 resize-friendly UI
 
-Without anchors, resize leaves the panel stranded in the middle of the screen.
+要「贴」到边缘的顶层 HUD 节点:
 
-For fixed-size game windows (e.g. 1152×720 Steam target), anchors are optional. For browser / mobile / responsive, anchors are required.
+- Top bar:`anchor_left=0, anchor_right=1, anchor_top=0, offset_right=0`(全宽,顶)
+- Bottom bar:`anchor_left=0, anchor_right=1, anchor_bottom=1, offset_top=-X`(全宽,距底 X 像素)
+- Side panel:`anchor_left=1, anchor_right=1, anchor_top=0, anchor_bottom=1`(右边缘,全高)
 
-## 12. Hit-test: `hit_radius` should be larger than visual
+没有锚点,resize 后 panel 会留在屏幕中间。
 
-Game objects you click on (pieces, cards, units) should expose a `hit_radius` that is **larger than the visible sprite**. 9×9 board with 56px cells and 22×9 visible piece → `hit_radius=36` is comfortable, `hit_radius=28` is too tight.
+对固定尺寸游戏窗口(如 1152×720 Steam 目标),锚点可选。对浏览器 / 移动 / 响应式,锚点必填。
 
-The visible bounds define what the user *sees*; the hit radius defines what the user *can click*. They are not the same number.
+## 12. 命中测试:`hit_radius` 应该比视觉大
 
-## 13. Don't manually position labels inside `Container`
+你要点击的游戏对象(棋子、卡、单位)应暴露 `hit_radius` 大于可见精灵。9×9 棋盘 56px 格子 22×9 可见棋子 → `hit_radius=36` 舒适,`hit_radius=28` 太紧。
 
-| Bad | Good |
-|---|---|
-| 5 `Label` children with `position = Vector2(0, 32 * i)` | `VBoxContainer` with default separation |
-| `Label` next to `Button` with manual `x` offset | `HBoxContainer` with `add_child(label)` then `add_child(button)` |
+可见边界定义用户 *看到* 的;hit radius 定义用户 *能点* 的。不是同一个数。
 
-The `Container` is auto-aligning, font-size-adaptive, and themeable. Manual positioning is the enemy of every future font / theme change.
+## 13. 不要在 `Container` 里手摆 Label 位置
 
-## 14. Resource-based theming, not inline colors
+| 坏 | 好 |
+|----|------|
+| 5 个 `Label` 子节点 `position = Vector2(0, 32 * i)` | `VBoxContainer` 默认 separation |
+| `Label` 挨着 `Button` 手 x 偏移 | `HBoxContainer` `add_child(label)` 后 `add_child(button)` |
 
-A `Theme` resource (`res://theme.tres`) is one file that styles every `Button` / `Label` in the project. Inline `theme_override_colors/font_color = Color(...)` per button is a maintenance trap.
+`Container` 自动对齐、自适应字体大小、可主题化。手写位置是每个未来字体 / 主题变更的敌人。
+
+## 14. Resource 主题化,不用 inline color
+
+`Theme` 资源(`res://theme.tres`)是一个文件,给项目所有 `Button` / `Label` 设样式。每个按钮 inline `theme_override_colors/font_color = Color(...)` 是维护陷阱。
 
 ```gdscript
-# Project theme: a single .tres file with styleboxes, fonts, colors
-# Apply at the project root or per-scene root:
+# 项目主题: 单一 .tres 文件含 stylebox、font、color
+# 应用在项目根或场景根:
 $Root.theme = preload("res://theme.tres")
 ```
 
-For one-off overrides (e.g. error text red), use `theme_override_*` — but keep them minimal.
+一次性 override(如错误文本红),用 `theme_override_*` — 但保持最少。
 
-## 15. `@export` for designer-tunable values, `@onready` for child caches
+## 15. `@export` 用于设计师可调,`@onready` 用于子节点缓存
 
 ```gdscript
 @export_range(50.0, 800.0) var piece_drag_speed: float = 220.0
@@ -217,51 +222,50 @@ For one-off overrides (e.g. error text red), use `theme_override_*` — but keep
 @onready var shop_panel: PanelContainer = $HUD/ShopPanel
 ```
 
-`@onready var` resolves at `_ready()` so `$Path` is never null. `@export` exposes to Inspector for designer tuning without recompile.
+`@onready var` 在 `_ready()` 解析所以 `$Path` 永远非 null。`@export` 暴露给 Inspector 设计师调不重编。
 
-## 16. The four minimum diagnostics
+## 16. 四个最小诊断
 
-When UI breaks, in this order:
+UI 坏时按顺序:
 
-1. `print(get_viewport_rect().size)` in `_ready()` — confirm viewport size matches design
-2. `print(node.global_position, node.size, node.mouse_filter)` for every overlapping `Control` — find the click-eater
-3. In `_unhandled_input` first line: `print(event.position, " ", event.pressed)` — confirm event reached the parent
-4. `print(piece.position, piece.hit_radius, "d=", mouse.distance_to(piece.position))` — confirm hit-test math
+1. 在 `_ready()` 打印 `get_viewport_rect().size` — 确认 viewport 大小匹配设计
+2. 对每个重叠的 `Control` 打印 `node.global_position, node.size, node.mouse_filter` — 找到 click-eater
+3. 在 `_unhandled_input` 第一行 `print(event.position, " ", event.pressed)` — 确认事件到达父节点
+4. 打印 `piece.position, piece.hit_radius, "d=", mouse.distance_to(piece.position)` — 确认命中测试算式
 
-These four prints solve 90% of "UI doesn't work" debugging.
+这四次打印能解 90%「UI 不工作」调试。
 
----
+## 常见 bug 模式
 
-## Common bug patterns
+| 症状 | 根因 | 修复 |
+|------|------|------|
+| Button 点击无效 | `_input` 处理函数吃了它 | 用 `pressed` 信号(规则 4) |
+| 拖拽在物体上可以但不在其 label 上 | Label `mouse_filter=STOP` | 设 `MOUSE_FILTER_IGNORE`(规则 3) |
+| Panel 长过 `offset_bottom` | 内层 `VBox` 是 `SIZE_FILL` | 设 `size_flags_vertical = 0`(规则 2) |
+| HUD 被切底 | viewport 小于设计 | stretch mode `expand` 或重设设计 |
+| resize 后 Panel 位置错 | 用了绝对 `position`,不是锚点 | 用锚点(规则 11) |
+| Tween 在场景切换时冻结 | autoload 管理的 tween;在 `queue_free` 前取消 | 在 `_exit_tree` `kill()`(规则 6) |
+| HUD 后面的游戏对象点击不到 | HUD `Control` 在 `CanvasLayer` 顶层 | 检查 mouse层 / Z(规则 3 + 8) |
 
-| Symptom | Root cause | Rule |
-|---|---|---|
-| Button click does nothing | `_input` handler consumed it | 4 |
-| Drag works on object, not on its label | Label `mouse_filter=STOP` | 3 |
-| Panel grows past its `offset_bottom` | Inner `VBox` has `SIZE_FILL` | 2 |
-| HUD cut off at bottom | Viewport smaller than design | 10 |
-| Panel in wrong place after resize | Used absolute `position`, not anchors | 11 |
-| Tween freezes when scene changes | Autoload-managed tween; cancel before `queue_free` | 6 |
-| Click on game object behind HUD never fires | HUD `Control` is on top in `CanvasLayer` | 3 + 8 |
+## 参考索引
 
-## Reference index
+深入阅读:
 
-For deep dives:
+- `references/container-layout.md` — 完整 container / size_flags 参考与图示
+- `references/mouse-and-click.md` — `_input` 链、拖拽模式、`mouse_filter` 深入
+- `references/visual-feedback.md` — Tween 模式、modulate、自定义鼠标
+- `references/responsive-layout.md` — 锚点、stretch 模式、多分辨率
 
-- `references/container-layout.md` — full container / size_flags reference with diagrams
-- `references/mouse-and-click.md` — `_input` chain, drag patterns, `mouse_filter` deep dive
-- `references/visual-feedback.md` — Tween patterns, modulate, custom cursor
-- `references/responsive-layout.md` — anchors, stretch modes, multi-resolution
+## 输出契约
 
-## Output contract
+此 skill 只读知识。在写 /修 Godot UI 时应用规则。不要生成新 skill;不要跑脚本;不要修改活动 Godot 项目外的文件。
 
-This skill is read-only knowledge. Apply its rules when writing / fixing Godot UI. Don't generate new skills; don't run scripts; don't modify files outside the active Godot project.
+## 失败处理
 
-## Failure handling
+如果 UI bug 不匹配上述任一规则,bug 要么是:
 
-If a UI bug doesn't match any rule above, the bug is either:
-- viewport size mismatch (Rule 10) — print and verify
-- a non-`Control` parent issue (e.g. `Node2D` is the parent, drag is a custom hit_radius — see `references/mouse-and-click.md`)
-- a script bug in the handler — print inside the handler
+- viewport 大小不匹配(规则 10)— 打印并验证
+- 非 `Control` 父节点问题(例如 `Node2D` 是父,拖拽是自定义 `hit_radius` — 见 `references/mouse-and-click.md`)
+- 处理函数里的脚本 bug — 在处理函数内 print
 
-If still stuck, fall back to the four diagnostics (Rule 16) in order.
+还卡住的话,回退到规则 16 的四个诊断,按顺序试。

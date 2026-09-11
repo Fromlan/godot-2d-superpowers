@@ -1,12 +1,12 @@
 ---
 name: godot-coding-2d
-description: Use when writing or modifying 2D Godot code, or when a plan task is being executed. Enforces Godot 2D coding conventions, static typing, signal ownership, and the layered testing strategy (logic TDD / integration / manual). Reads godot-gdscript-patterns and godot-2d-physics as the technical sources.
+description: "在写或修改 2D Godot 代码,或执行计划任务时使用。强制 Godot 2D 编码约定、静态类型、信号所有权,以及分层测试策略(逻辑 TDD / 集成 / 手动)。读 godot-gdscript-patterns 和 godot-2d-physics 作为技术来源。"
 last_reviewed: 2026-09-10
 ---
 
 <!-- argument-hint: [logic | integration | experience | refactor] -->
 
-# Godot Coding 2D (含分层测试策略)
+# Godot 2D 编码 (含分层测试策略)
 
 > 写 2D Godot 代码时的统一规范 + **分层测试策略**。
 > 走完本技能,产出"符合项目约定、覆盖对应层级测试"的代码改动。

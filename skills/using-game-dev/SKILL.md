@@ -1,12 +1,12 @@
 ---
 name: using-game-dev
-description: Use when starting any conversation on a 2D Godot project — establishes how to find and use game-dev skills, requires skill invocation before ANY response including clarifying questions.
+description: "在 2D Godot 项目上开始任何对话时使用 — 建立如何查找和使用游戏开发技能的方式,在任何回复(包括澄清问题)前要求调用技能。"
 last_reviewed: 2026-09-10
 ---
 
 <!-- argument-hint: none (this skill is the dispatcher; pick a skill from the decision table) -->
 
-# Using Game Dev Superpowers (2D Godot)
+# 使用游戏开发超能力 (2D Godot)
 
 > 调度入口。**所有会话的第一步**:读这个 SKILL.md,查决策表,再行动。
 
@@ -76,14 +76,14 @@ last_reviewed: 2026-09-10
 - **知识类技能** = 告诉你**具体技术是什么**(API 用法、最佳实践)
 - 二者**不互斥**:流程类会指引你读哪些知识类
 
-## User Instructions Take Precedence
+## 用户指令优先
 
 User instructions (CLAUDE.md, AGENTS.md, 直接请求) > skills > default behavior.
 **只有用户显式说"这次跳过 X"**,才允许跳过技能。否则按决策表走。
 
 ## Subagent Dispatch
 
-If you were dispatched as a subagent to execute a specific task, you may skip the `using-game-dev` lookup IF the parent agent has already routed you to a specific skill. Otherwise, still check the decision table.
+如果你是作为子代理被派发执行特定任务,可以跳过 `using-game-dev` 查询 — 前提是父代理已经把你路由到具体技能。否则仍查决策表。
 
 ## Scope (作用域)
 

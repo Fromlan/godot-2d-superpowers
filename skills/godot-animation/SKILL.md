@@ -7,35 +7,35 @@ last_reviewed: 2026-09-10
 
 <!-- argument-hint: [animation type, e.g. 'Tween', 'AnimationTree', 'state machine'] -->
 
-# Godot Animation (4.7)
+# Godot 动画 (4.7)
 
-Actionable rules for Godot 4 animation: when to use Tween vs AnimationPlayer vs AnimationTree vs AnimatedSprite2D, plus state machine patterns. Deep dives in `references/<topic>.md`.
+Godot 4 动画的实操规则:何时用 Tween vs AnimationPlayer vs AnimationTree vs AnimatedSprite2D,以及状态机模式。深入阅读见 `references/<topic>.md`。
 
-## 1. The 4-way decision tree
+## 1. 四路决策树
 
-Pick the animation API by what you're animating and why:
+按「你在动什么、为什么」选动画 API:
 
-| Question | Answer | Use |
-|last_reviewed: 2026-09-10
----|---|---|
-| One property, one transition, ~0.1-0.5s | "Yes" | `Tween` |
-| Multiple properties on a timeline, 1-30s | "Yes" | `AnimationPlayer` |
-| Multiple named states with transitions, character behavior | "Yes" | `AnimationTree` + StateMachine |
-| Sprite-sheet flipbook (idle/walk/attack frames) | "Yes" | `AnimatedSprite2D` |
-| Just a single "modulate to red then back" hit flash | "Yes" | `Tween` |
-| A complex combat move with 50 keyframed properties | "Yes" | `AnimationPlayer` |
-| Boss with 6 states (idle/attack/hurt/die/summon/teleport) | "Yes" | `AnimationTree` |
-| A 4-frame walk loop from a sprite sheet | "Yes" | `AnimatedSprite2D` |
+| 问题 | 回答 | 用 |
+|------|------|-----|
+| 一个属性,一次过渡,~0.1-0.5s | 是 | `Tween` |
+| 一个时间轴上多个属性,1-30s | 是 | `AnimationPlayer` |
+| 多个命名状态带转换,角色行为 | 是 | `AnimationTree` + StateMachine |
+| 精灵表翻页(idle/walk/attack 帧) | 是 | `AnimatedSprite2D` |
+| 仅一个「modulate 转红再转回」受击闪烁 | 是 | `Tween` |
+| 一个复杂战斗动作带 50 个关键帧属性 | 是 | `AnimationPlayer` |
+| Boss 有 6 个状态(idle/attack/hurt/die/summon/teleport) | 是 | `AnimationTree` |
+| 一个 4 帧行走循环从精灵表 | 是 | `AnimatedSprite2D` |
 
-**Rule of thumb**:
-- Tween for "I need this one thing to change smoothly" (always procedural in code)
-- AnimationPlayer for "I have a hand-authored sequence" (visual editor)
-- AnimationTree for "I have multiple sequences and need to blend / transition" (state machine)
-- AnimatedSprite2D for "I have a sprite sheet with frames" (frame-by-frame)
+**经验法则**:
 
-## 2. Tween — quick reference
+- Tween 用于「我需要这一个东西平滑变化」(代码优先,迭代快)
+- AnimationPlayer 用于「我有一个手工创作的时间序列」(可视化编辑器,设计师友好,可拖时间轴)
+- AnimationTree 用于「我有多个序列需要 blend / 切换」(状态机)
+- AnimatedSprite2D 用于「我有精灵表带帧」(逐帧)
 
-Tweens are covered in detail in `godot-ui-best-practices` Rule 6. Highlights:
+## 2. Tween — 速查
+
+Tween 在 `godot-ui-best-practices` Rule 6 有详细讲解。要点:
 
 ```gdscript
 var t := create_tween()
@@ -44,19 +44,20 @@ t.tween_property(node, "modulate", Color(1.4, 1.4, 1.0), 0.08)
 t.tween_property(node, "scale", Vector2.ONE * 1.15, 0.08)
 ```
 
-For attack effects: a flash + a scale pulse + a position reset is 3 `tween_property` calls in one `tween` (set `set_parallel(true)` for the first two, then a sequential one for the reset).
+对攻击效果:闪烁 + 缩放脉冲 + 位置归位是同一个 `tween` 的 3 个 `tween_property` 调用(前两个 `set_parallel(true)`,归位用 sequential)。
 
-**Tween vs AnimationPlayer**: same outcome, different authoring. Tween = code-first, fast iteration. AnimationPlayer = visual editor, designer-friendly, scrubbable timeline.
+**Tween vs AnimationPlayer**:同样效果,创作方式不同。Tween = 代码优先,迭代快;AnimationPlayer = 可视化编辑器,设计师友好,可拖时间轴。
 
-For 90% of one-shot effects (hit flash, drag highlight, menu slide), Tween is fine. Reach for AnimationPlayer when you want designers to iterate without code edits.
+对于 90% 的一次性效果(受击闪烁、拖拽高亮、菜单滑入),Tween 够了。要设计师无代码改动地迭代时用 AnimationPlayer。
 
-## 3. AnimationPlayer — when you need a timeline
+## 3. AnimationPlayer — 当你有时间轴时
 
-Use when:
-- The animation is "designed" (an animator authored it)
-- Multiple properties change together (position + rotation + scale + modulate)
-- You want to scrub the timeline in the editor
-- The animation might be reused (e.g. "walk" plays on multiple characters)
+使用场景:
+
+- 动画是「设计出来的」(美术师做的)
+- 多个属性一起变(位置 + 旋转 + 缩放 + modulate)
+- 想在编辑器里拖时间轴
+- 动画可能被复用(例如「walk」播给多个角色)
 
 ```gdscript
 @onready var anim: AnimationPlayer = $AnimationPlayer
@@ -65,7 +66,7 @@ func play_animation(name: String) -> void:
     anim.play(name)
 
 func play_with_crossfade(name: String, fade := 0.2) -> void:
-    anim.play(name, fade)  # second arg = crossfade time
+    anim.play(name, fade)  # 第二个参数 = 交叉淡入时间
 
 # Wait for animation to finish
 signal attack_landed
@@ -74,22 +75,23 @@ func _on_anim_animation_finished(anim_name: StringName) -> void:
         attack_landed.emit()
 ```
 
-Connect `animation_finished` signal. The parameter is the animation name; check if it's the one you care about.
+连 `animation_finished` 信号。参数是动画名;检查是不是你在乎的那个。
 
-**Call `play()` deferred during `_ready`**: animations played directly in `_ready` of a node that's not yet in the tree can have ordering issues. Use `call_deferred("play", "name")` to schedule after the tree settles.
+**在 `_ready` 中 `call_deferred` 调 `play()`**:直接在尚未入树的节点的 `_ready` 里播的动画会有顺序问题。用 `call_deferred("play", "name")` 排到树建好之后。
 
-## 4. AnimationTree + StateMachine — character behavior
+## 4. AnimationTree + StateMachine — 角色行为
 
-For complex characters (boss, enemy with multiple moves), `AnimationTree` with a `StateMachine` is the canonical pattern.
+对复杂角色(Boss、带多种动作的敌人),`AnimationTree` + `StateMachine` 是规范模式。
 
-In the editor:
-1. Add `AnimationTree` node
-2. Set `tree_root` to a new `AnimationNodeStateMachine` resource
-3. Add states (each state = one animation)
-4. Add transitions between states (with conditions)
-5. Connect transitions to triggers / booleans / other conditions
+编辑器中:
 
-In code:
+1. 加 `AnimationTree` 节点
+2. 把 `tree_root` 设为新的 `AnimationNodeStateMachine` 资源
+3. 加状态(每个状态 = 一个动画)
+4. 加状态间转换(带条件)
+5. 把转换连到 triggers / booleans / 其他条件
+
+代码中:
 
 ```gdscript
 @onready var anim_tree: AnimationTree = $AnimationTree
@@ -103,53 +105,47 @@ func request_state(name: String) -> void:
     anim_tree.set("parameters/conditions/" + name, true)
 ```
 
-For Z-2 style auto-chess: characters don't need AnimationTree (combat is auto, no player input). Use it for the boss enemy in a future chapter.
+对 Z-2 这种自走棋:角色不需要 AnimationTree(战斗是自动,无玩家输入)。将来某章 Boss 敌人用它。
 
-## 5. State transition patterns
+## 5. 状态转换模式
 
-AnimationTree StateMachine has 4 transition types:
+AnimationTree StateMachine 有 4 种转换类型:
 
-| Type | Behavior | Use |
-|---|---|---|
-| **Immediate** | jump now, no blend | death, hard cutscenes |
-| **Sync** | wait for current to reach same time position | cutscenes with sync |
-| **At End** | wait for current to finish | attack → idle after attack ends |
+| 类型 | 行为 | 用途 |
+|------|------|-----|
+| **Immediate** | 立即切换,无 blend | 切换瞬间发生(受伤闪红) |
+| **Sync** | 同步切换,要求动画帧同步 | 切换后保持相位一致 |
+| **At End** | 等待当前动画结束再切换 | 攻击 → 待机;等攻击播完再 idle |
+| **Auto** | 条件全满足自动触发(默认) | 连续状态机,根据条件自动切换 |
+**反模式**:`request_attack` 在每次切换后忘记重置,导致条件一直 true → 状态机死循环。规则 4 中 `request_attack` 在切换完成后自动重置。
 
-Most game state transitions are "At End" (play attack fully, then return to idle).
+## 6. `queue()` 与 `play()` 语义
 
-For "request" pattern (player presses attack during idle):
-1. Set a `request_attack` condition in the StateMachine
-2. StateMachine has `idle → attack` transition with condition `request_attack`
-3. Attack plays; transition `attack → idle` is "At End" of attack
-4. `request_attack` auto-resets after transition
+| 调用 | 行为 |
+|------|-----|
+| `play("a")` | 立即开始 "a",替换当前播放 |
+| `play("a", 0.2)` | 开始 "a",带 0.2s 从当前淡入 |
+| `queue("a")` | 当前动画结束时开始 "a" |
+| `stop()` | 停止;动画不再播放 |
+| `pause()` / `play()` | 暂停 / 继续,不重新启动 |
 
-## 6. `queue()` and `play()` semantics
-
-| Call | Behavior |
-|---|---|
-| `play("a")` | start "a" immediately, replacing whatever is playing |
-| `play("a", 0.2)` | start "a" with 0.2s crossfade from current |
-| `queue("a")` | when current animation finishes, start "a" |
-| `stop()` | halt; the animation is no longer playing |
-| `pause()` / `play()` | toggle playback without restarting |
-
-`play()` is restart. To "play if not playing", check first:
+`play()` 是重启。要「不在播就播」,先检查:
 
 ```gdscript
 if not anim.is_playing() or anim.current_animation != "attack":
     anim.play("attack")
 ```
 
-Or use `queue()` for sequencing ("attack", then on finish, "idle"):
+或者用 `queue()` 串行("attack",然后结束时 "idle"):
 
 ```gdscript
 anim.play("attack")
 anim.queue("idle")
 ```
 
-## 7. `animation_finished` signal
+## 7. `animation_finished` 信号
 
-Fires when a non-looping animation reaches its end, OR when manually stopped mid-way.
+当非循环动画到达结尾触发,**或**手动中途停止。
 
 ```gdscript
 anim.animation_finished.connect(_on_anim_finished)
@@ -165,13 +161,13 @@ func _on_anim_finished(anim_name: StringName) -> void:
             pass  # wildcard
 ```
 
-For AnimationTree, the signal comes from the underlying `AnimationPlayer`. Connect via `anim_tree.anim_player.animation_finished`.
+对 AnimationTree,信号来自底层 `AnimationPlayer`。用 `anim_tree.anim_player.animation_finished` 连。
 
-**Looping animations** (`loop = true` in the inspector) don't fire `animation_finished` per loop iteration. They fire only when `stop()` is called or the animation manually ends.
+**循环动画**(`loop = true` 在 inspector)不会每帧迭代都触发 `animation_finished`。只在 `stop()` 调用或动画手动结束时触发。
 
-## 8. `call_deferred` for `play()` in `_ready`
+## 8. `_ready` 中 `call_deferred` 调 `play()`
 
-Direct `play()` in `_ready` can have ordering issues with signals, other components starting up, etc.:
+直接在 `_ready` 里 `play()` 可能与信号、其他组件启动有顺序问题:
 
 ```gdscript
 func _ready() -> void:
@@ -182,11 +178,11 @@ func play(name: String) -> void:
     $AnimationPlayer.play(name)
 ```
 
-`call_deferred` schedules the call for the next idle frame, after the tree is fully built.
+`call_deferred` 把调用排到下一帧 idle,树建好之后。
 
-## 9. GPUParticles2D with AnimationPlayer
+## 9. GPUParticles2D 配 AnimationPlayer
 
-For "play VFX on attack":
+「攻击时放 VFX」:
 
 ```gdscript
 # VFX node:
@@ -197,51 +193,53 @@ func play_attack_vfx() -> void:
     $VFX/AnimationPlayer.play("play")
 ```
 
-The AnimationPlayer's "play" animation has 2 keyframes:
-- 0.0s: `emitting = true`, `restart = true` (resets the particle system)
-- 0.0s: end the animation (1 frame duration)
+AnimationPlayer 的 "play" 动画有 2 个关键帧:
 
-Particle system auto-clears when `emitting` is set to false. To control lifetime explicitly, set `lifetime` on GPUParticles2D.
+- 0.0s: `emitting = true`, `restart = true`(重置粒子系统)
+- 0.0s: 结束动画(1 帧时长)
 
-## 10. Animation performance
+粒子系统在 `emitting` 设 false 时自动清除。要显式控制 lifetime,在 GPUParticles2D 上设 `lifetime`。
 
-| Cost | Mitigation |
-|---|---|
-| Animating `position` on many nodes | batch into a single parent; animate parent |
-| Many `AnimationPlayer`s updating every frame | share animations between players (set `animation` resource) |
-| Long animations evaluated every frame | keyframe at lower rate (0.05s instead of 0.01s) |
-| `process_callback` set to `IDLE` (default) for visual anims; `PHYSICS` for movement | keep movement keyframed in PHYSICS to align with physics ticks |
+## 10. 动画性能
 
-For Z-2's 9×9 board with 10-20 pieces, AnimationPlayer cost is negligible. The concern is for hundreds of simultaneously animating nodes (UI tween + 50 particles + 20 enemies).
+| 成本 | 缓解 |
+|------|------|
+| 大量节点每帧动 position | 批到一个父节点;动父节点 |
+| 多个 `AnimationPlayer` 每帧更新 | 在 player 之间共享动画(设 `animation` 资源) |
+| 长动画每帧评估 | 关键帧间隔低更 (0.05s 而不是 0.01s) |
+| `process_callback` 在 IDLE(默认)做视觉动画;PHYSICS 做运动 | 运动的动画关键帧化在 PHYSICS,与物理 tick 对齐 |
 
-## Common bug patterns
+对 Z-2 9×9 棋盘 10-20 棋子,AnimationPlayer 成本可忽略。担心的是几百个同时动画的节点(UI tween + 50 粒子 + 20 敌人)。
 
-| Symptom | Root cause | Rule |
-|---|---|---|
-| Animation never starts | `play()` called in `_ready` of a not-yet-in-tree node | 8 |
-| Animation restarts from 0 instead of continuing | `play()` re-called; use `queue()` or check `is_playing` | 6 |
-| Crossfade looks "popped" | Crossfade too short; or animations have different first frames | 3 |
-| `animation_finished` fires for looping anim | Animation not set to `loop = true`; or `stop()` was called | 7 |
-| AnimTree transitions don't fire | Transition condition never set in code | 4 |
-| State machine stuck | Cycle of transitions; or condition always true | 4 |
-| Particle "explodes once" then never again | `restart = true` not in animation, or process_material doesn't reset | 9 |
-| `play()` returns OK but nothing happens | AnimationLibrary empty, or animation name typo | 3 |
+## 常见 bug 模式
 
-## Reference index
+| 症状 | 根因 | 修复 |
+|------|------|------|
+| 动画不开始 | `play()` 在尚未入树的节点 `_ready` 中调用 | 用 `call_deferred` |
+| 动画从 0 重启而不是续播 | `play()` 重复调;用 `queue()` 或检查 `is_playing` |  |
+| 交叉淡入看起来「popped」 | 交叉淡入太短;或动画首帧不同 | 延长淡入 / 对齐首帧 |
+| `animation_finished` 对循环动画触发 | 动画没设 `loop = true`;或 `stop()` 被调 | 设 loop 或避免 stop |
+| AnimTree 转换不触发 | 转换条件从不在代码里设 | 检查 `parameters/...` 参数名与编辑器匹配 |
+| 状态机卡住 | 转换循环;或条件一直 true | 加 hysteresis(状态最小停留时间) |
+| 粒子「爆炸一次」后不再出现 | 动画里没设 `restart = true`,或 process_material 不重置 | 在动画里设 restart |
+| `play()` 返回 OK 但没效果 | AnimationLibrary 为空,或动画名拼错 | 检查库与名字 |
 
-- `references/tween-vs-animationplayer.md` — decision tree, side-by-side examples
-- `references/animationtree-statemachine.md` — full state machine code + inspector walkthrough
-- `references/animatedsprite-flipbook.md` — sprite sheet import + flipbook config
+## 参考索引
 
-## Output contract
+- `references/tween-vs-animationplayer.md` — 决策树、并排示例
+- `references/animationtree-statemachine.md` — 完整状态机代码 + inspector 演示
+- `references/animatedsprite-flipbook.md` — 精灵表导入 + 翻页配置
 
-Read-only knowledge. Apply the rules when building / fixing Godot animations. Don't generate new skills; don't run scripts; don't modify files outside the active Godot project.
+## 输出契约
 
-## Failure handling
+只读知识。在写 / 改 Godot 动画时应用规则。不要生成新 skill;不要跑脚本;不要修改活动 Godot 项目外的文件。
 
-If an animation bug doesn't match any rule above:
-- AnimationPlayer: print `anim.current_animation`, `anim.is_playing()`, `anim.current_animation_position` to see state
-- AnimationTree: print `anim_tree.get("parameters/playback")` to see current state
-- AnimatedSprite2D: print `sprite.frame`, `sprite.animation`, `sprite.is_playing()`
+## 失败处理
 
-If still stuck, fall back to the four diagnostics in `references/tween-vs-animationplayer.md`.
+如果动画 bug 不匹配上述任一规则:
+
+- AnimationPlayer:打印 `anim.current_animation`、`anim.is_playing()`、`anim.current_animation_position` 看状态
+- AnimationTree:打印 `anim_tree.get("parameters/playback")` 看当前状态
+- AnimatedSprite2D:打印 `sprite.frame`、`sprite.animation`、`sprite.is_playing()`
+
+还卡住的话,回退到 `references/tween-vs-animationplayer.md` 的四个诊断。

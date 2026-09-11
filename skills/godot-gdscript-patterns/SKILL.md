@@ -1,29 +1,28 @@
 ---
 name: godot-gdscript-patterns
 description: |
-  Godot 4.7 GDScript:静态类型、@export / @onready、Signal 解耦、Resource 数据驱动、class_name、autoload 边界、preload vs load。Use when 提到"GDScript 静态类型"、"@export"、"@onready"、"Signal 解耦"、"Resource 数据"、"class_name"。Do NOT use for UI 布局(见 godot-ui-best-practices)。Read-only knowledge。
+  Godot 4.7 GDScript:静态类型、@export / @onready、Signal 解耦合、Resource 数据驱动、class_name、autoload 边界、preload vs load。Use when 提到"GDScript 静态类型"、"@export"、"@onready"、"Signal 解耦合"、"Resource 数据"、"class_name"。Do NOT use for UI 布局(见 godot-ui-best-practices)。Read-only knowledge。
 last_reviewed: 2026-09-10
 ---
 
 <!-- argument-hint: [pattern, e.g. 'signal', '@export', 'autoload', 'class_name', 'Resource'] -->
 
-# Godot GDScript Patterns (4.7)
+# Godot GDScript 模式 (4.7)
 
-Actionable rules for GDScript: static typing, annotations, signals as decoupling, Resource as data, autoload boundaries. Deep dives in `references/<topic>.md`.
+GDScript 的实操规则:静态类型、注解、信号解耦合、Resource 作为数据、autoload 边界。深入阅读见 `references/<topic>.md`。
 
-## 1. Static typing is not stylistic
+## 1. 静态类型不是风格问题
 
-`var x: int = 5` is **not** the same as `var x = 5` at runtime:
+`var x: int = 5` 在运行时 **不是** 等同于 `var x = 5`:
 
-| | Untyped | Typed |
-|last_reviewed: 2026-09-10
----|---|---|
-| Runtime path | Variant dispatch (boxing) | Direct C-like path (no boxing) |
-| Performance | ~2-4× slower per op | near-C speed |
-| Static analysis | warnings only | errors at edit time |
-| Memory | variant overhead | stack or direct member |
+| 维度 | 无类型 | 有类型 |
+|----------|----------|----------|
+| 运行时路径 | Variant 分发(装箱) | 直接 C 路径(无装箱) |
+| 性能 | 每操作约 2-4 倍慢 | 接近 C |
+| 静态分析 | 仅警告 | 编辑时报错 |
+| 内存 | Variant 开销 | 栈或直接成员 |
 
-For anything beyond a demo, type aggressively. The analyzer catches type errors before runtime.
+超出 demo 范围的项目都要严格类型化。分析器在运行前就抓到类型错误。
 
 ```gdscript
 # Right
@@ -39,15 +38,15 @@ var position = Vector2.ZERO
 var allies = []
 ```
 
-For variant / truly-dynamic types (e.g. JSON parsing, dictionaries with mixed types), use `Variant`:
+对于真正 Variant / 动态的类型(如 JSON 解析、值混合的 Dictionary),用 `Variant`:
 
 ```gdscript
 var data: Variant = JSON.parse_string(raw_text)
 ```
 
-## 2. `@export` for designer-tunable values
+## 2. `@export` 用于设计师可调的数值
 
-`@export` exposes a property to the Inspector, where designers (and you) can tweak it without code edits.
+`@export` 把属性暴露给 Inspector,设计师(和你)能在不修改代码的前提下调整。
 
 ```gdscript
 @export var speed: float = 220.0
@@ -60,13 +59,13 @@ var data: Variant = JSON.parse_string(raw_text)
 @export var attack_range: int = 1
 ```
 
-`@export_range(min, max)` adds a slider. `@export_enum(...)` adds a dropdown. `@export_group("name")` groups properties in the inspector.
+`@export_range(min, max)` 加滑块。`@export_enum(...)` 加下拉。`@export_group("name")` 在 Inspector 分组。
 
-**Rule**: anything that should be tunable without code recompile gets `@export`. Gameplay numbers, art references, thresholds. Internal flags / counters don't.
+**规则**:不需重新编译就能调的数值都用 `@export`。玩法数值、美术引用、阈值。内部标志 / 计数器不用。
 
-## 3. `@onready` for child node caches
+## 3. `@onready` 用于子节点缓存
 
-`@onready` resolves at `_ready()`, so `$Path` is never null when you access it later:
+`@onready` 在 `_ready()` 解析,所以 `$Path` 之后访问不会是 null:
 
 ```gdscript
 @onready var board: Board = $Board
@@ -74,20 +73,20 @@ var data: Variant = JSON.parse_string(raw_text)
 @onready var attack_line_pool: Array[Line2D] = $AttackLines.get_children()
 ```
 
-**Why not just use `$Path` inline?** Because `$Path` calls a function each time, and if the path is wrong, the call returns null and crashes later (in a hard-to-debug location). `@onready` resolves once at `_ready`; if the path is wrong, you get an immediate error pointing at the bad line.
+**为什么不直接用内联的 `$Path`?** 因为 `$Path` 每次访问都调用函数,路径错返回 null 然后在难调的位置崩溃。`@onready` 在 `_ready` 一次性解析;路径错就立即报错指向出错行。
 
-**Anti-pattern**: `@onready` for nodes that don't exist in the scene. Use `@export var piece_scene: PackedScene` and `instantiate()` at runtime instead.
+**反模式**:用 `@onready` 引用场景里不存在的节点。改用 `@export var piece_scene: PackedScene` 然后运行时 `instantiate()`。
 
-## 4. Signals as decoupling (instead of `get_node` cross-tree access)
+## 4. 信号解耦合(代替 `get_node` 跨树访问)
 
-**Anti-pattern**: Node A reaches into Node B's tree to call its method:
+**反模式**:A 节点钻进 B 节点的树里调方法:
 
 ```gdscript
 # Node A wants to notify Node B
 get_node("/root/Main/Battle/HUD/SomeLabel").text = "Score: 100"
 ```
 
-**Right**: Node A emits a signal; Node B (or anyone) connects:
+**正确**:A 发信号,B(或任何人)连接:
 
 ```gdscript
 # Emitter
@@ -103,13 +102,14 @@ func _on_score_changed(new_score: int) -> void:
     label.text = "Score: %d" % new_score
 ```
 
-**Why signals**:
-- Type-checked parameters (editor flags mismatches at connect time)
-- Multiple listeners can react (1 emitter → N receivers)
-- Decoupled: emitter doesn't know or care who listens
-- Survives node reparenting / scene changes (signal connection stays)
+**为什么用信号**:
 
-**Type your signal parameters** for editor-time safety:
+- 类型化参数(编辑器在连接时就会报错)
+- 多接收者(1 个 emitter → N receivers)
+- 解耦合:emitter 不关心谁在听
+- 节点重 parent / 换场景时连接仍生效
+
+**给信号参数加类型**以便编辑器保护:
 
 ```gdscript
 signal piece_killed(piece: Piece, killer: Piece)
@@ -117,158 +117,101 @@ signal hp_changed(new_hp: int, max_hp: int)
 signal turn_started(turn_number: int)
 ```
 
-**Connection flags**:
+**连接标志**:
+
 ```gdscript
-piece_killed.connect(_on_piece_killed)              # default; runs in caller
-piece_killed.connect(_on_piece_killed, CONNECT_DEFERRED)   # runs at idle (safe mid-iteration)
-piece_killed.connect(_on_piece_killed, CONNECT_PERSIST)   # survives scene reload
-piece_killed.connect(_on_piece_killed, CONNECT_ONE_SHOT)  # auto-disconnect after one fire
+piece_killed.connect(_on_piece_killed)                              # default; runs in caller
+piece_killed.connect(_on_piece_killed, CONNECT_DEFERRED)            # runs at idle (safe mid-iteration)
+piece_killed.connect(_on_piece_killed, CONNECT_PERSIST)              # survives scene reload
+piece_killed.connect(_on_piece_killed, CONNECT_ONE_SHOT)             # auto-disconnect after one fire
 ```
 
-`CONNECT_DEFERRED` is the safety net when the listener might modify the emitter's state mid-emission (e.g. modifying a list while iterating).
+`CONNECT_DEFERRED` 是接收者可能在 emitter 触发中改其状态时的安全网(比如在迭代中改 list)。
 
-## 5. Resource as data (`extends Resource` + `.tres`)
+## 5. Resource 作为数据(`extends Resource` + `.tres`)
 
-For data that needs to be shared / edited / saved as a file, use a `Resource`:
+可复用资源(贴图、声音、材质、武器)做成 `Resource` 存为 `.tres`;实体(`Node`)有行为并引用资源。
 
 ```gdscript
-# res://data/piece_data.gd
+# scripts/piece_data.gd
 class_name PieceData extends Resource
 
-@export var piece_name: String = ""
-@export var max_hp: int = 100
-@export var attack_damage: int = 50
-@export var attack_range: int = 1
-@export var color: Color = Color.WHITE
+@export var id: StringName
+@export var display_name: String
+@export_multiline var description: String
+@export var cost: int = 1
+@export var base_hp: int = 100
+@export var base_attack: int = 50
+@export var icon: Texture2D
 ```
 
-Save as `res://data/pieces/ply_001.tres`. Reference from a node:
+**为什么 Resource 而不是 Dictionary**:
+
+- 类型化(Dictionary 运行时才能发现错误)
+- Inspector 可绑(`@export var data: PieceData` 可在 Inspector 选资源)
+- IDE 跳转(在 Resource 子类定义上点击跳转)
+- 可序列化为 `.tres`
+
+**UID vs 路径**(`asset_uid` 系统,Godot 4.4+):
 
 ```gdscript
-@export var data: PieceData
+# Brittle: 改名就坏
+var scene := load("res://data/pieces/ply_001.tres")
 
-func _ready() -> void:
-    hp = data.max_hp
-    sprite.color = data.color
+# Robust: UID 在重命名后保持稳定
+var scene := load("uid://b1234abcde")
 ```
 
-**Why resources**:
-- Inspector-editable (designers tweak without code)
-- Version-controllable as `.tres` text
-- Reusable across many nodes
-- Type-safe: `PieceData` not `Dictionary`
-- Hot-reload: edit `.tres` while game runs, see changes live
+## 6. `class_name` 全局脚本引用
 
-Z-2 already uses this pattern (`PieceData.tres` for each piece). Extend it for enemies, weapons, spells, buildings.
-
-## 6. `class_name` for global script references
-
-`class_name Foo` registers the script globally. Use it for scripts that other scripts need to reference:
+顶层声明 `class_name X` 让 X 在整个项目全局可引用(自动出现在「Create Node」对话框):
 
 ```gdscript
-# piece.gd
+# scripts/piece.gd (top of file)
 class_name Piece extends Node2D
+
+# Anywhere else in the project
+var p: Piece = Piece.new()
 ```
 
-Now `Piece` is a global type. Other scripts can:
+避免循环依赖:如果 A 引 B、B 引 A,改成单向引用或用 EventBus。
+
+**复制本仓库 `class_name` 时务必重命名**(否则触发 "class_name already registered")。建议 `PieceData` → `YourGamePiece`,或加项目前缀。
+
+## 7. Autoload 边界(仅用于跨场景基础设施)
+
+`Project Settings → Autoload` 留给真正跨场景的状态:save manager、audio bus、networking peer。**不要**把所有东西都塞 autoload。
 
 ```gdscript
-@onready var piece: Piece = $Pieces/MyPiece
-var data: PieceData
-var pieces: Array[Piece] = []
-```
-
-**Anti-pattern**: `class_name` on every script. Use it for scripts that are part of the public API of your game (entities, controllers, data types). For internal helpers (e.g. a Tween factory), skip `class_name` to avoid polluting the global namespace.
-
-**Conflict warning**: duplicate `class_name` declarations across your project cause "Script already registered" warnings. Use a project-wide prefix:
-
-```gdscript
-class_name Z2_Piece  # or just Piece; pick a convention
-```
-
-## 7. Autoload boundary (only for cross-scene infrastructure)
-
-`Project Settings → Autoload` runs the script once at startup, accessible as a global.
-
-**Use for**:
-- Save / settings manager (survives scene change)
-- Music manager (Z-2 MusicManager candidate)
-- Network peer / multiplayer state
-- Theme manager (if themes persist across scenes)
-
-**Don't use for**:
-- Per-scene state ("current battle", "current score")
-- Anything that could be passed by reference
-- Business logic that should be in a normal Node
-
-```gdscript
-# res://autoloads/save_manager.gd
+# res://autoloads/event_bus.gd
 extends Node
-
-const SAVE_PATH := "user://save.json"
-
-func save_game(data: Dictionary) -> void:
-    var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-    f.store_string(JSON.stringify(data, "\t"))
-
-func load_game() -> Dictionary:
-    if not FileAccess.file_exists(SAVE_PATH):
-        return {}
-    var f := FileAccess.open(SAVE_PATH, FileAccess.READ)
-    var raw := f.get_as_text()
-    return JSON.parse_string(raw) as Dictionary
+signal player_died
+signal level_cleared
+signal score_changed(new_score: int)
 ```
 
-The autoload is in the scene tree from the start. Other scripts do `SaveManager.save_game(...)` anywhere.
+注册:`Project Settings → Autoload → "EventBus"`。
 
-**Anti-pattern**: autoload as a "global var drawer" for "I'll just stash it here". This couples unrelated systems and makes testing hard.
+## 8. `@warning_ignore` 用于有理由的忽略
 
-## 8. `@warning_ignore` for justified suppressions
-
-The static analyzer warns about:
-- `unused_local_variable` (e.g. `var x := compute_x()` where `x` is set but never read)
-- `unused_private_local_variable` (e.g. `var _x := ...` — note the underscore)
-- `unused_parameter` (function parameter never used)
-- `shadowed_variable` (local var shadows a member)
-- `inferred_declaration` (`var x := 5` is untyped; use `var x: int = 5`)
-- `untyped_declaration` (`: Variant` instead of a real type)
-- `unsafe_method_access` (calling a method on a `Variant` type)
-- `unsafe_property_access` (accessing property on `Variant`)
-
-For justified suppressions, use `@warning_ignore`:
+代码分析器抛警告时,先**真的修**它。如果有充分理由必须忽略,在行尾加 `@warning_ignore("...")` 注释:
 
 ```gdscript
-@warning_ignore("unused_parameter")
-func _on_animation_finished(anim_name: StringName) -> void:
-    # We don't care which animation finished; just that one did
-    pass
-
-@warning_ignore("shadowed_variable")
-func complex_calculation(input: Array) -> void:
-    var sum := 0  # shadows the member 'sum' on purpose
-    for x in input:
-        sum += x
+func _ready() -> void:
+    if some_global_thing != null:
+        do_work()  # @warning_ignore("unsafe_method_access") 外部 init 早于 _ready,已知
 ```
 
-**Don't blanket-ignore** — that's hiding bugs. Use suppressions per-line, with a comment explaining why.
+**反模式**:`@warning_ignore` 用来盖掉"我不知道"的警告。永远先查为什么,再决定忽略。
 
 ## 9. `preload()` vs `load()`
 
-```gdscript
-# At parse time: file is read once, cached
-const MyScene := preload("res://my_scene.tscn")
-const MyData := preload("res://data/my_data.tres")
-
-# At runtime: file is read each call (cached after first, but the lookup is runtime)
-var scene: PackedScene = load("res://my_scene.tscn")
-```
-
-`preload()` is **statically resolved** — the path is validated at script parse time. If the file doesn't exist, the script fails to load. Use for known-fixed assets (your own scenes, your own data).
-
-`load()` is **runtime-resolved** — the path is a string evaluated at call time. Use for:
-- Mod loading (path comes from user / config file)
-- Conditional loading (load `easy_mode.tres` or `hard_mode.tres` based on settings)
-- Loading from a folder enumeration
+| | preload | load |
+|----------|---------|------|
+| 时机 | 解析时(脚本加载) | 运行时 |
+| 性能 | 一次加载,可缓存 | 每次调用都解析路径 |
+| 路径错 | 立即报错 | 运行时崩溃 |
+| 用于 | 自己的资源 | 动态路径(如 mod) |
 
 ```gdscript
 # Right: preload your own assets
@@ -279,15 +222,15 @@ var mod_path := "res://mods/%s/piece.tres" % mod_name
 var piece := load(mod_path) as PieceData
 ```
 
-## 10. `Variant` boundary
+## 10. `Variant` 边界
 
-Use `Variant` only at the edges:
+`Variant` 只用在边界:
 
-- JSON parsing (`JSON.parse_string` returns `Variant`)
-- Dictionary values (`Dictionary[String, Variant]`)
-- Signal parameters that genuinely are mixed types (rare)
+- JSON 解析(`JSON.parse_string` 返回 `Variant`)
+- 值混合的 Dictionary(`Dictionary[String, Variant]`)
+- 真正类型混合的 signal 参数(罕见)
 
-Inside your code, type everything:
+代码内部一律加类型:
 
 ```gdscript
 # At the boundary
@@ -300,38 +243,38 @@ if typeof(raw_data) == TYPE_DICTIONARY:
     var hp: int = dict.get("hp", 0)
 ```
 
-The `unsafe_method_access` and `unsafe_property_access` warnings flag this. Use them as a guide: if you see the warning, narrow the type.
+`unsafe_method_access` 和 `unsafe_property_access` 警告会标记这种代码。看到警告就加类型。
 
-## 11. Resource UID vs hardcoded paths
+## 11. Resource UID vs 硬编码路径
 
 ```gdscript
-# Brittle: if you rename the file, this breaks
+# Brittle: 改名就坏
 var scene := load("res://data/pieces/ply_001.tres")
 
-# Robust: UID is stable across renames
+# Robust: UID 跨重命名稳定
 var scene := load("uid://b1234abcde")
 ```
 
-`uid://...` is generated when the file is first imported. The UID is stored in the file's `.import` sidecar. Right-click a file in the editor → "Copy Resource Path" or "Copy UID".
+`uid://...` 是文件首次导入时生成的。UID 存在文件的 `.import` 侧车。右键编辑器文件 → "Copy Resource Path" 或 "Copy UID"。
 
-Use UIDs in `@export` properties for stable references. Plain paths are fine for one-off script code, but `@export var data: PieceData` with a UID-derived reference is more robust.
+`@export` 属性用 UID 派生引用最稳。普通路径对一次性脚本代码够用,但 `@export var data: PieceData` 用 UID 更稳。
 
-## 12. Typed dictionaries (Godot 4.4+)
+## 12. Typed Dictionary (Godot 4.4+)
 
 ```gdscript
 var stats: Dictionary[String, int] = {"hp": 100, "attack": 50, "defense": 30}
 var config: Dictionary[String, Variant] = {"name": "hero", "level": 5, "alive": true}
 ```
 
-Typed dictionaries catch wrong-value-type access at edit time:
+Typed Dictionary 在编辑时抓错值类型访问:
 
 ```gdscript
 stats["hp"] = "100"   # analyzer error: expected int, got String
 ```
 
-Use them when the dictionary has a known schema (save data, config, message bus). For truly dynamic data, plain `Dictionary` is fine.
+schema 已知(存档、配置、消息总线)时用 typed。真正动态数据用普通 `Dictionary`。
 
-## 13. Static functions (no `self`)
+## 13. 静态函数(无 `self`)
 
 ```gdscript
 static func is_valid_position(pos: Vector2) -> bool:
@@ -342,49 +285,50 @@ if Board.is_valid_position(some_pos):
     ...
 ```
 
-Use `static func` for utility methods that don't need instance state. They can be called from anywhere without needing a reference to an instance.
+不需要实例状态的工具方法用 `static func`。可以从任何地方调用,无需实例引用。
 
-## 14. Constants vs exports vs magic numbers
+## 14. 常量 vs export vs 魔法数字
 
-| Type | Where it lives | When to change |
-|---|---|---|
-| `const X := 5` | in script | rarely (recompile) |
-| `@export var x: int = 5` | inspector | by designer / for tuning |
-| `var x: int = 5` (mutable) | runtime, instance state | not by design |
+| 类型 | 位置 | 何时改 |
+|------|------|--------|
+| `const X := 5` | 脚本,编译时 | 极少(需重编译) |
+| `@export var x: int = 5` | Inspector | 设计师调 |
+| `var x: int = 5`(可变) | 运行时,实例状态 | 非设计意图 |
 
-Constants for math (PI, gravity, max integer), layout (default font size, default spacing), and lookup tables. Exports for gameplay values. Mutable vars for per-instance state.
+数学常量(PI、gravity、max int)、布局常量(default font size、default spacing)、查找表用 const;玩法数值用 export;可变 var 用于每实例状态。
 
-**Don't make everything `@export`** — designers drown in noise. Reserve `@export` for the 5-10 values per script that should be tunable.
+**不要把所有东西都做成 `@export`** — 设计师会被淹没。每个脚本只暴露 5-10 个可调值。
 
-## Common bug patterns
+## 常见 bug 模式
 
-| Symptom | Root cause | Rule |
-|---|---|---|
-| `$Path` returns null | typo or path changed | Use `@onready`, get parse-time error |
-| `null` reference in `_ready` | `$Path` called before scene tree is built | Use `@onready` (resolves at right time) |
-| Static analysis noise | untyped declarations | Type everything (Rule 1) |
-| Signal never fires | `emit_signal` typo, or signal connected wrong | Type signal params, IDE shows autocompletion |
-| `class_name already registered` warning | duplicate `class_name` in project | search and rename |
-| Resource changes don't show in game | Forgot to `@export var data: Resource` and assign in editor | Inspector-bound property |
-| `load()` fails at runtime | path typo | `preload` instead (catches at parse time) |
-| Mod doesn't load | used `preload` for mod path (must be runtime) | `load` with string path |
+| 症状 | 根因 | 修复 |
+|------|------|------|
+| `$Path` 返回 null | 拼错或路径改了 | 用 `@onready`,拿到解析时报错 |
+| `_ready` 里 null 引用 | 场景树建好前访问了 `$Path` | 用 `@onready`(在对的时机解析) |
+| 静态分析噪声 | 无类型声明 | 全部加类型(规则 1) |
+| 信号不触发 | `emit_signal` 拼错,或信号连错 | 给信号参数加类型,IDE 自动补全 |
+| `class_name already registered` 警告 | 同一名字在同一项目里重复 | 重命名或移除重复 |
+| 资源修改游戏里没体现 | 忘了 `@export var data: Resource` 并在编辑器赋值 | 在 Inspector 绑资源 |
+| `load()` 运行时失败 | 路径拼错 | 用 `preload` 改为解析时 |
+| Mod 加载不到 | 给 mod 路径用了 `preload`(必须运行时) | 运行时用 `load` |
 
-## Reference index
+## 参考索引
 
-- `references/static-typing.md` — full guide to typing, when to use `Variant`, performance impact
-- `references/signals-decoupling.md` — signals as architecture, connection patterns
-- `references/resource-data-driven.md` — Resource as data, save/load, versioned assets
+- `references/static-typing.md` — 完整类型指南、何时用 `Variant`、性能影响
+- `references/signals-decoupling.md` — 信号作为架构、连接模式
+- `references/resource-data-driven.md` — Resource 作为数据、存读、版本化资产
 
-## Output contract
+## 输出契约
 
-Read-only knowledge. Apply the rules when writing / fixing GDScript. Don't generate new skills; don't run scripts; don't modify files outside the active Godot project.
+只读知识。在写 /改 GDScript 时应用规则。不要生成新 skill;不要跑脚本;不要修改活动 Godot 项目外的文件。
 
-## Failure handling
+## 失败处理
 
-If a GDScript bug doesn't match any rule above, the bug is either:
-- Path / node tree error (Rule 3) — print `get_path()` on suspect nodes
-- Signal connection error (Rule 4) — print `Object.get_signal_connection_list(signal_name)`
-- Type mismatch (Rule 1) — add type annotations; warnings become errors
-- Resource load error (Rule 5) — check `.import` sidecar; check `ResourceLoader.exists(path)`
+如果 GDScript bug 不匹配上述任一规则:
 
-If still stuck, the static analyzer is your friend: `godot --headless --check-only res://path/to/script.gd` surfaces type errors.
+- 路径 / 节点树错(规则 3)— 在嫌疑节点上 `print(get_path())`
+- 信号连接错(规则 4)— `print(Object.get_signal_connection_list(signal_name))`
+- 类型不匹配(规则 1)— 加类型注解;警告变错误
+- Resource 加载错(规则 5)— 检查 `.import` 侧车;检查 `ResourceLoader.exists(path)`
+
+还卡住的话,静态分析器是你的朋友:`godot --headless --check-only res://path/to/script.gd` 会暴露类型错误。
