@@ -1,7 +1,7 @@
 {
   "name": "godot-2d-superpowers",
   "version": "0.1.0",
-  "description": "A skills framework & game development methodology for 2D Godot projects: brainstorming, GDD, prototype, planning, layered testing, asset pipeline, level data flow, code review, debugging, and release checklist.",
+  "description": "A skills framework & game dev workflow for 2D Godot solo developers.",
   "author": {
     "name": "Fromlan",
     "url": "https://github.com/Fromlan"
@@ -17,11 +17,7 @@
     "gdd",
     "prototype",
     "tdd",
-    "asset-pipeline",
-    "code-review",
-    "debugging",
-    "release",
-    "superpowers"
+    "asset-pipeline"
   ],
   "skills": "./skills/",
   "hooks": {}

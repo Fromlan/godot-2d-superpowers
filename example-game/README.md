@@ -76,6 +76,37 @@ Then enable in project.godot or via Plugins panel.
 | `assets/sprites/icon.svg` | `asset-pipeline` (programmatic placeholder) |
 | `project.godot` (layer_names) | `godot-2d-physics` (collision layers) |
 
+
+
+## Renaming class_name before forking into your own project
+
+The example declares two `class_name` values: `DamageCalc` (in `scripts/damage_calc.gd`) and
+`PlayerMotionOutput` (in `scripts/player_motion_output.gd`).
+
+If you copy this project into another Godot project that also has these names, you'll get
+`class_name already registered` warnings. Rename them to project-scoped names:
+
+1. `DamageCalc` → `<YourGame>Damage` (or similar; the convention is one namespace per project).
+2. `PlayerMotionOutput` → `<YourGame>MotionOutput`.
+3. Update all references:
+   - `scripts/player.gd` uses `PlayerMotionOutput.new()` and `-> PlayerMotionOutput` return type.
+   - `tests/test_damage_calc.gd` calls `DamageCalc.compute(...)`.
+
+A safe mass-rename pattern (PowerShell):
+
+```powershell
+Get-ChildItem -Path . -Recurse -Include *.gd | ForEach-Object {
+  (Get-Content $_.FullName) -replace 'DamageCalc', 'MyGameDamage' | Set-Content -Path $_.FullName -Encoding UTF8
+}
+```
+
+Then verify no leftover references:
+
+```powershell
+Get-ChildItem -Path . -Recurse -Include *.gd | Select-String -Pattern 'DamageCalc'
+# Should return no matches.
+```
+
 ## License
 
 MIT. Sprite placeholder is hand-drawn SVG, original.

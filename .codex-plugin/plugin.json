@@ -1,7 +1,7 @@
 {
   "name": "godot-2d-superpowers",
   "version": "0.1.0",
-  "description": "Planning, TDD, asset pipeline, debugging, and release workflows for 2D Godot solo developers.",
+  "description": "Game dev workflow skills for 2D Godot solo developers.",
   "author": {
     "name": "Fromlan",
     "email": "noreply@example.com"
@@ -10,7 +10,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Godot 2D Superpowers",
-    "shortDescription": "Game dev workflows for 2D Godot (solo)",
+    "shortDescription": "2D Godot workflow (solo)",
     "longDescription": "Use this plugin to walk a 2D Godot project from a one-line idea through brainstorming, GDD, prototype, planning, layered testing, asset pipeline, level data flow, code review, debugging, finishing-the-branch, and release checklist.",
     "developerName": "Fromlan",
     "category": "Game Development",
@@ -22,7 +22,10 @@
     "defaultPrompt": [
       "Let's make a 2D platformer.",
       "Let's design a 2D puzzle game.",
-      "Add a new feature to my 2D Godot project."
+      "Add a new feature to my 2D Godot project.",
+      "Build a roguelike in Godot 4.7.",
+      "Set up a tower defense prototype.",
+      "Add card mechanics to my game."
     ],
     "websiteURL": "https://github.com/Fromlan/godot-2d-superpowers",
     "brandColor": "#478CBF",

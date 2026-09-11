@@ -75,24 +75,18 @@ static func compute_motion(
     friction: float,
     jump_velocity: float,
     gravity: float
-) -> Dictionary:
-    var v := prev_velocity
-    var coyote := 0.0
-    var buf := 0.0
+) -> PlayerMotionOutput:
+    var out := PlayerMotionOutput.new()
+    out.linear_velocity = prev_velocity
 
     # Gravity
     if not grounded:
-        v.y += gravity * delta
+        out.linear_velocity.y += gravity * delta
 
     # Horizontal movement
     if abs(input_dir) > 0.01:
-        v.x = move_toward(v.x, input_dir * max_speed, acceleration * delta)
+        out.linear_velocity.x = move_toward(out.linear_velocity.x, input_dir * max_speed, acceleration * delta)
     else:
-        v.x = move_toward(v.x, 0.0, friction * delta)
+        out.linear_velocity.x = move_toward(out.linear_velocity.x, 0.0, friction * delta)
 
-    return {
-        "linear_velocity": v,
-        "should_jump": false,
-        "new_coyote_timer": coyote,
-        "new_jump_buffer_timer": buf,
-    }
+    return out
