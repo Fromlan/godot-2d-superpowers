@@ -6,25 +6,21 @@ last_reviewed: 2026-09-10
 
 <!-- argument-hint: none (this skill is the dispatcher; pick a skill from the decision table) -->
 
-<EXTREMELY-IMPORTANT>
-If you think there is even a 1% chance a skill might apply to what you are doing, you ABSOLUTELY MUST invoke the skill.
-
-IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
-
-This is not negotiable. You cannot rationalize your way out of this.
-</EXTREMELY-IMPORTANT>
-
 # Using Game Dev Superpowers (2D Godot)
 
 > 调度入口。**所有会话的第一步**:读这个 SKILL.md,查决策表,再行动。
 
 ## The Rule
 
-**Invoke relevant or requested skills BEFORE any response or action** — including clarifying questions, exploring the codebase, or checking files. If it turns out wrong for the situation, you don't have to use it.
+**按决策表查技能,在任何回复或动作前先调用** — 包括澄清问题、探索代码、查文件。
 
-**Before entering plan mode**: if you haven't already brainstormed, invoke `game-brainstorming` first.
+- **关键检查点(必须)**:有明文标 "必须" 的流程类技能不能跳过(测试、review、调试、发布前的 review)。
+- **路径选择(建议)**:prototype 选做、scale fence 自由,但用户可以显式说"这次跳过 X"覆盖。
+- **默认 vs 显式**:有合理默认,但用户显式覆盖必须明确记录。
 
-Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it has a checklist, create a todo per item.
+**进入 plan 模式前**:若还未 brainstorming,先调 `game-brainstorming`。
+
+然后公告 "Using [skill] to [purpose]" 并严格按技能执行。如有 checklist,每条建一个 todo。
 
 ## Decision Table (必须先查,再行动)
 

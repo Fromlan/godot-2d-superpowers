@@ -1,6 +1,6 @@
 ---
 name: gdd-author
-description: 游戏设计文档（GDD）撰写技能。覆盖概念设计、核心循环、机制、叙事世界观、商业化、竞品分析、关卡设计、数值设计等全流程；按规模自适应 Game jam / Solo / Team 三档。触发：游戏设计 / GDD / 核心循环 / 玩法机制 / 叙事设计 / 商业化 / 竞品分析 / 关卡设计 / 数值设计 / 世界观 / 策划案 / 设计支柱 / 核心玩法。
+description: "撰写 GDD(游戏设计文档):按规模自适应 Game jam / Solo / Team 三档模板。Use when 用户提到 "GDD"、"核心循环"、"玩法机制"、"设计支柱" 等。Do NOT use for 实现层细节(见 godot-coding-2d)、关卡数据(见 level-data-flow)、资源(见 asset-pipeline)。"
 last_reviewed: 2026-09-10
 ---
 
@@ -95,7 +95,7 @@ last_reviewed: 2026-09-10
 2. 决定是否拆子模块: **≥ 3 个内容子主题** → 拆目录 (`02-xxx/`, `03-xxx/`...); 否则单文件
 3. 写入 `<Obsidian>/输出/灵感库/<游戏名>/00-主设计文档.md` (或用户指定目录)
 4. **handoff** — 显式告诉用户下一步:
-   > "GDD 已完成。下一步: 调 `godot-feature-workflow` 把 §2 核心机制拆成可执行 feature tickets, 或调 `godot-data-driven-config` 把 §3 内容表格化。"
+   > "GDD 已完成。下一步: 调 `game-writing-plans` 把 §2 核心机制拆成 5-15 分钟任务;关卡/数表调到 `level-data-flow` 把 §3 内容落成 .tres;实现层走 `godot-coding-2d`。"
 5. 提示用户: "这是 living document, 改设计时同步回这里。"
 
 ## 3. 模板
@@ -133,7 +133,7 @@ tags: [<genre>, <platform>, ...]
 | 写不出 1.1 一句话 | 含糊 / 超长 | 引 Drafft stopping rule |
 | Scope OUT 列表为空 | 4.2 留白 | **硬性拒绝** "完成" |
 | 描述用 "丰富细腻" 等空话 | 美术 / 世界章节 | 替换为参考图 / 色板 / 情绪词 3 选 1, 否则 TBD |
-| 用户问实现细节 (Godot 节点) | Phase 1–4 中混入 | 切 `godot-feature-workflow` / `godot-data-driven-config` |
+| 用户问实现细节 (Godot 节点) | Phase 1–4 中混入 | 切 `godot-coding-2d` / `godot-gdscript-patterns` |
 | 输入超长 (已有 500 行 GDD) | 用户贴了完整稿 | **审计模式**: 不重写, 按本 skill 节号映射打勾, 输出 "差异清单" |
 | 用户没说游戏名 | Phase 0 | 占位 `<新游戏-001>`, 收尾前 ask_user 确认改名 |
 | 已有项目要 "扩展 GDD" | 不是从零 | "按节修订" 子流程: 读现状, 只补缺节, 不重写已有节 |
@@ -146,23 +146,27 @@ tags: [<genre>, <platform>, ...]
 
 ## 6. 不触发 (路由到其他 skill)
 
-- "拆解 XX 游戏怎么设计的" → `game-analysis` (user-scope)
-- "Godot 里怎么实现战斗 / 动画 / 物理" → `godot-feature-workflow` / `godot-2d-physics` / `godot-animation`
-- "数值表怎么设计" → `godot-data-driven-config`
-- "画个角色 / 美术风格" → `Game Art Master` (user-scope)
-- "用 AI 生成图像" → `mcode-tools-master`
+- "拆解 XX 游戏怎么设计的" → `systematic-debugging-2d`(机制层) 或 `game-brainstorming`(重审方向)
+- "Godot 里怎么实现战斗 / 动画 / 物理" → `godot-coding-2d` / `godot-2d-physics` / `godot-animation`
+- "数值表怎么设计" → `godot-gdscript-patterns`(Resource 数据驱动)
+- "画个角色 / 美术风格" → `asset-pipeline`(命名 + 导入规范)
+- "加新关卡 / 改难度" → `level-data-flow`
+- "关卡数据已准备好,开始实现" → `game-writing-plans`(拆任务)
 
-## 7. 与 `godot-connector` Codex 插件其他 skill 的协作
+## 7. 与本套件其他 skill 的协作
+
+GDD 是设计文档,不含 Godot 节点结构 / 引擎 API / 性能数据。完成 handoff 后,引导用户走实现层:
 
 ```
 gdd-author (设计层)
-  ├─→ godot-feature-workflow (实现层, 拆 feature tickets)
-  ├─→ godot-data-driven-config (数据层, §3 内容表格化)
-  ├─→ godot-gdscript-patterns (代码层, 模式参考)
-  └─→ godot-2d-physics / godot-animation / godot-audio (子领域, 机制落地)
+  ├─→ game-writing-plans (拆任务到 5-15 分钟粒度)
+  ├─→ godot-coding-2d (实现机制 + 分层测试)
+  ├─→ level-data-flow (§3 关卡数据落成 .tres)
+  ├─→ asset-pipeline (§3 美术 / 音频资源命名与导入)
+  ├─→ godot-gdscript-patterns (Resource 数据驱动 + 静态类型规范)
+  └─→ godot-2d-physics / godot-animation / godot-audio (子领域落地)
 ```
 
-GDD 不是开发文档, 不含 Godot 节点结构 / 引擎 API / 性能数据。**完成 handoff 后, 引导用户走实现层**。
 
 ## 8. 状态与并发
 
