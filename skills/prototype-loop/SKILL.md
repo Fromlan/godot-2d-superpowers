@@ -1,7 +1,7 @@
 ---
 name: prototype-loop
 description: "当用户已批准 GDD 的核心循环,想在全面实现前验证"手感",或说"原型"/"试一下感觉"/"playtest this"时使用。Godot 2D 专项:极简场景、极简美术、脚本驱动验证、时间盒迭代。"
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [core-loop | mechanic | full-game] -->
@@ -23,6 +23,7 @@ last_reviewed: 2026-09-10
 - 还没 GDD → 先 `game-brainstorming` / `gdd-author`
 - 已经进入正式开发 → 直接 `game-writing-plans`
 - 美术/UI 验证 → 这不是循环验证,用 `asset-pipeline`
+- 原型关卡用程序化几何(ColorRect / StaticBody2D / CollisionShape2D),**不写 LevelLayout、`.tres`、`@export var data: Resource`** — 这些都属 `level-data-flow` 正式开发范畴
 
 ## 1. 原则(必须遵守)
 
@@ -93,7 +94,7 @@ last_reviewed: 2026-09-10
 ### Step 5 — 决策(三选一)
 
 | 结果 | 动作 |
-|last_reviewed: 2026-09-10
+|last_reviewed: 2026-09-11
 ------|------|
 | **A. 通过** | 把数值带进 `game-writing-plans`,原型代码扔掉 |
 | **B. 局部调** | 改 `NOTES.md` 的"单一变量",再做 1 个原型(共 ≤ 2 个) |
@@ -118,8 +119,16 @@ last_reviewed: 2026-09-10
 - **录制**: Windows 自带录屏(Game Bar: Win+G),或 OBS
 - **输入**: 直接读 `Input.is_action_pressed`,不写 InputMap(原型阶段)
 
-## 5. 衔接
+## 5. 衔接(prototype → plan,NOTES.md 数值迁移)
 
-- 通过 → `game-writing-plans`(带上 `NOTES.md` 的调参记录)
+**通过**:
+1. 从 `prototype/NOTES.md` 的"复盘"区抽取每次 `@export` 调参的**最终值**
+   - 字段名、单位、取值范围
+   - 模板与字段定义见 `references/prototype-to-plan-handoff.md`
+2. 把抽取结果作为 `game-writing-plans` 第一条任务(T1)的**"参数"**字段
+3. prototype **代码全部留在 `prototype/` 目录,不复制到正式项目**(只迁"参数",不迁代码)
+4. 跳 `game-code-review`(prototype 是"丑但能跑",非正式交付,不走审查)
+
+**失败 / 部分通过**:
 - 失败 → 回 `game-brainstorming` 或 `gdd-author`
-- 部分通过 → 决定保留哪些机制,删哪些
+- 部分通过 → 决定保留哪些机制,删哪些,然后回到上面"通过"路径

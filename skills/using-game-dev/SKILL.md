@@ -1,7 +1,7 @@
 ---
 name: using-game-dev
 description: "在 2D Godot 项目上开始任何对话时使用 — 建立如何查找和使用游戏开发技能的方式,在任何回复(包括澄清问题)前要求调用技能。"
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: none (this skill is the dispatcher; pick a skill from the decision table) -->
@@ -25,11 +25,12 @@ last_reviewed: 2026-09-10
 ## Decision Table (必须先查,再行动)
 
 | 用户输入特征 | 调用的技能 | 顺序 |
-|last_reviewed: 2026-09-10
+|last_reviewed: 2026-09-11
 --------------|------------|------|
 | "我想做一款..." / 想法/概念/无 GDD | `game-brainstorming` | 1 |
 | "帮我写 GDD" / "写设计文档" / "GDD review" | `gdd-author` | 1 |
 | "核心循环" / "原型" / "试一下感觉" / "playtest" | `prototype-loop` | 1 |
+| | 通过 → `game-writing-plans`(中间不走 `game-code-review`) | — |
 | GDD 已批准,开始开发 / "实现 X" | `game-writing-plans` → `godot-coding-2d` | 1→2 |
 | 添加素材 / 换图片 / 改音效 / 字体 / 动画 | `asset-pipeline` | 1 |
 | 改关卡 / 加关 / 章节数据 | `level-data-flow` | 1 |
@@ -45,6 +46,7 @@ last_reviewed: 2026-09-10
 | InputMap/Action/手柄/快捷键 | `godot-input-actions` | 1 |
 | UI/Control/CanvasLayer/布局 | `godot-ui-best-practices` | 1 |
 | 查不到 | 列出 2-3 个最可能命中的候选,问用户选哪个 | — |
+| 输入明显是 3D / 非 Godot 项目 | **主动告知用户本套件不适用**,问是否继续 | — |
 
 ## Skill Priority (组合调用顺序)
 
@@ -89,4 +91,5 @@ User instructions (CLAUDE.md, AGENTS.md, 直接请求) > skills > default behavi
 
 - 覆盖:2D Godot 项目(平台跳跃/动作/解谜/卡牌/roguelike/塔防/清版等)
 - 不覆盖:3D Godot、Unity、Unreal、GameMaker、其他引擎
+- **强提示**:本套件只覆盖 2D Godot;遇到 3D / 非 Godot 项目,**必须先告知用户再行动**,不允许默默绕过
 - 遇到非 2D Godot 项目:明确告知用户本套件不适用,问是否要继续

@@ -1,7 +1,7 @@
 ---
 name: game-code-review
 description: "一批实现任务完成、或准备合并功能分支、或用户说"review 一下"/"看看代码"时使用。两阶段审查:规格合规(对照计划/GDD)和 Godot 代码质量(反模式)。按严重度报告问题,仅关键问题阻塞。"
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [batch | feature | full-game] -->
@@ -19,6 +19,10 @@ last_reviewed: 2026-09-10
 - PR/分支准备合
 - 关键改动后(改了 project.godot、加了资源)
 
+**不调本技能**:
+- prototype 阶段 → 不调本技能。`prototype-loop` 第 5 节"通过"路径跳 review,直接进 `game-writing-plans`
+- prototype 任务的代码留在 `prototype/` 目录,非正式交付
+
 ## 1. 工作流
 
 ### Stage 1 — 规格合规(必须先做)
@@ -27,7 +31,7 @@ last_reviewed: 2026-09-10
 
 ```markdown
 | 任务 | 计划要求 | 实际产出 | 偏差 |
-|last_reviewed: 2026-09-10
+|last_reviewed: 2026-09-11
 ------|----------|----------|------|
 | T1 | 写 player.gd 含跳跃 | ✓ | — |
 | T2 | 在 main.tscn 接入 | ⚠️ 用了不同节点名 | 中 |
@@ -108,6 +112,8 @@ last_reviewed: 2026-09-10
 - [ ] _process 不做重活
 
 ### 3.8 测试覆盖(按 godot-coding-2d 分层)
+
+**前置条件**:仅适用于 `game-writing-plans` 派出的任务批。`prototype-loop` 任务不检测试覆盖(prototype 阶段无 TDD,见 `prototype-loop/SKILL.md` 第 1 节原则 5)。
 
 - [ ] 逻辑层有 GUT 测试
 - [ ] 装配层有集成测试

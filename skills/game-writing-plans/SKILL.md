@@ -1,7 +1,7 @@
 ---
 name: game-writing-plans
 description: "当 GDD 已批准,用户想开始实现,或说"写计划"/"拆任务"/"开始开发"时使用。Godot 2D 专项:5-15 分钟任务粒度,每任务的显式场景/脚本/资产分类,含子代理派发规则。"
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [from-gdd | from-feature | from-bug] -->
@@ -14,7 +14,7 @@ last_reviewed: 2026-09-10
 ## 0. 路由(单题)
 
 | 选项 | 含义 | 主走 |
-|last_reviewed: 2026-09-10
+|last_reviewed: 2026-09-11
 ------|------|------|
 | **A. 从 GDD 拆** | GDD 已批准,从头拆实现 | 走完整流程 |
 | **B. 加新功能** | 已有项目,加一个 feature | 走精简版,只拆该 feature |
@@ -44,6 +44,10 @@ last_reviewed: 2026-09-10
   - 新建: `scripts/foo.gd`
   - 改: `scenes/main.tscn`(节点 X 挂脚本 Y)
 **前置**: T0
+**参数**(可选,常用于接 prototype-loop 数值):
+  - `<key>` = `<value>` `(单位, 来源)`
+  - 例: `JUMP_VELOCITY = 380.0` `(px/s, 来自 prototype/NOTES.md)`
+
 **步骤**:
 1. 写 `scripts/foo.gd`,内容:
    ```gdscript
@@ -153,3 +157,4 @@ T<id>: <任务名>
 - 计划完成 → `godot-coding-2d` 逐任务执行
 - 执行过程用 git worktree 隔离
 - 每批任务完成 → `game-code-review`
+- **若来自 prototype-loop**:T1 任务的"参数"字段从 `prototype/NOTES.md` 抽取,规则见 `skills/prototype-loop/references/prototype-to-plan-handoff.md`

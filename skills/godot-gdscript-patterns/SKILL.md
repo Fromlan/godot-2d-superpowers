@@ -2,7 +2,7 @@
 name: godot-gdscript-patterns
 description: |
   Godot 4.7 GDScript:静态类型、@export / @onready、Signal 解耦合、Resource 数据驱动、class_name、autoload 边界、preload vs load。Use when 提到"GDScript 静态类型"、"@export"、"@onready"、"Signal 解耦合"、"Resource 数据"、"class_name"。Do NOT use for UI 布局(见 godot-ui-best-practices)。Read-only knowledge。
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [pattern, e.g. 'signal', '@export', 'autoload', 'class_name', 'Resource'] -->
@@ -23,6 +23,41 @@ GDScript 的实操规则:静态类型、注解、信号解耦合、Resource 作�
 | 内存 | Variant 开销 | 栈或直接成员 |
 
 超出 demo 范围的项目都要严格类型化。分析器在运行前就抓到类型错误。
+
+### 1.1 硬性规则清单(必须)
+
+任何 GDScript 文件必须满足下列 4 条,缺一不可:
+
+1. **公共方法显式参数和返回类型**
+
+   ```gdscript
+   func compute_damage(base: int, armor: int) -> int:
+       return max(0, base - armor)
+   ```
+
+2. **`@export` 变量显式类型**
+
+   ```gdscript
+   @export var max_hp: int = 100       # ✓
+   @export var speed: float = 220.0    # ✓
+   @export var max_hp = 100            # ✗ 无类型,editor 警告
+   ```
+
+3. **`@onready` 节点引用显式类型**
+
+   ```gdscript
+   @onready var sprite: Sprite2D = $Sprite2D          # ✓
+   @onready var anim: AnimationPlayer = $AnimPlayer   # ✓
+   @onready var sprite = $Sprite2D                    # ✗ 无类型
+   ```
+
+4. **`class_name` 顶层声明**(避免循环依赖,让 IDE 能跳转)
+
+   ```gdscript
+   class_name PlayerData extends Resource
+   ```
+
+### 1.2 推荐写法
 
 ```gdscript
 # Right

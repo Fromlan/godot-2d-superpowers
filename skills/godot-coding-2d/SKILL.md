@@ -1,7 +1,7 @@
 ---
 name: godot-coding-2d
 description: "在写或修改 2D Godot 代码,或执行计划任务时使用。强制 Godot 2D 编码约定、静态类型、信号所有权,以及分层测试策略(逻辑 TDD / 集成 / 手动)。读 godot-gdscript-patterns 和 godot-2d-physics 作为技术来源。"
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [logic | integration | experience | refactor] -->
@@ -17,35 +17,57 @@ last_reviewed: 2026-09-10
 - 重构现有 Godot 代码
 - 用户说"加个 X"且 X 偏代码而非设计
 
-## 1. 上游先读(必须)
+## 1. 上游先读(必须,触发判据)
 
-写任何代码前,**先读这两份**:
+写任何代码前,根据**当前任务类型**查下表读对应 SKILL.md:
 
-1. `skills/godot-gdscript-patterns/SKILL.md` — GDScript 风格/静态类型/Resource/信号
-2. `skills/godot-2d-physics/SKILL.md` — 物理/碰撞/移动规范
+| 任务涉及 | 必读 |
+|---------|------|
+| 移动/碰撞/平台跳跃/CharacterBody2D/RigidBody2D | `godot-2d-physics` |
+| 帧动画/AnimatedSprite2D/AnimationPlayer/AnimationTree/Tween | `godot-animation` |
+| 音效/BGM/音量/AudioStreamPlayer/Audio bus | `godot-audio` |
+| UI/HUD/Control/CanvasLayer/按钮/拖拽/布局 | `godot-ui-best-practices` |
+| InputMap/手柄/快捷键/`Input.is_action_pressed` | `godot-input-actions` |
+| 加/换/移资源(图、音、字体、动画帧) | `asset-pipeline` |
+| 关卡布局/EntitySpawn/LevelLayout/.tres | `level-data-flow` |
+| **任何 GDScript 代码**(静态类型/Resource/Signal) | `godot-gdscript-patterns`(强制) |
 
-如果涉及动画/UI/音频,再对应读 `godot-animation` / `godot-ui-best-practices` / `godot-audio`。
+**禁绕过**:任何 GDScript 写出前必须先读 godot-gdscript-patterns——它是项目唯一权威源。
+
+**完整场景映射**(常见 15-20 个任务,例如"写血条"必读 ui + animation + gdscript-patterns):见 `references/upstream-triggers.md`
 
 **禁止**靠"我记着"写代码 — 规范会演进,以 SKILL.md 为准。
 
 ### 1.1 子代理派发时的强制(当通过 Codex `multi_agent_v1__spawn_agent` 派子任务时)
 
-子代理有**独立上下文**,父代理的"先读"指令不会自动带入。`using-game-dev` 的强制约束只对父 agent 生效,不能直接传导到子代理。因此:
+子代理有**独立上下文**,父代理的"先读"指令不会自动带入。`using-game-dev` 的强制约束只对父 agent 生效,不能直接传导到子代理。
 
-- 派发任务时,**父代理必须在 `message` 中显式写明**:`先读 skills/godot-gdscript-patterns/SKILL.md 和 skills/godot-2d-physics/SKILL.md 再写代码`。
-- 若任务涉及动画/UI/音频,追加对应"先读"指令(如 `再读 skills/godot-animation/SKILL.md`)。
+**message 模板**(严格按此构造,不得省略):
+
+```
+Using godot-coding-2d to <purpose>. 上游必读: skills/<X>/SKILL.md, skills/<Y>/SKILL.md. 禁止绕过先读直接写代码。
+```
+
+`<X>/<Y>` 取自第 1 节触发判据表的"必读"列。漏写必读项 = 子代理写出违反规范的代码,后果由父代理承担。
+
+**例**(写血条):
+
+```
+Using godot-coding-2d to write HP bar with damage flash. 上游必读: skills/godot-ui-best-practices/SKILL.md, skills/godot-animation/SKILL.md, skills/godot-gdscript-patterns/SKILL.md. 禁止绕过先读直接写代码。
+```
 
 反模式:仅在父代理自身的回复里说"我会让子代理先读 X"——子代理看不到。
 
 ## 2. 静态类型与命名(必须)
 
-参考 `godot-gdscript-patterns`,核心点:
-- 全文件 `@tool` 显式标注(仅编辑器脚本)
-- 公共方法必须显式参数/返回类型
-- `@export` 变量必须显式类型
-- `@onready` 节点引用必须显式类型
-- `class_name` 顶层声明,避免循环依赖
-- 命名:常量 `UPPER_SNAKE`、类 `PascalCase`、函数/变量 `snake_case`、私有前缀 `_`
+**完整规则**:见 `godot-gdscript-patterns/SKILL.md` 第 1 节(本项目唯一权威源)。
+
+本节仅列 coding-2d 特有项:
+
+- 全文件 `@tool` 显式标注(**仅编辑器脚本**;运行时脚本不写)
+- 信号所有权:**谁的状态变化,谁发信号**(详细规则见 `godot-gdscript-patterns` 第 4 节)
+- 节点引用:用 `@onready var x: NodeType = $X` + 显式类型;**禁止散落 `get_node("path/to/node")`**(详细规则见 `godot-gdscript-patterns` 第 3 节)
+- 命名:`PascalCase` 类、`snake_case` 变量/函数、`UPPER_SNAKE` 常量、私有前缀 `_`(完整规则见 `godot-gdscript-patterns` 第 1 节)
 
 ## 3. 信号所有权(必须)
 
@@ -57,7 +79,7 @@ last_reviewed: 2026-09-10
 ## 4. 场景/资源/脚本的边界(必须)
 
 | 元素 | 谁拥有 | 改动原则 |
-|last_reviewed: 2026-09-10
+|last_reviewed: 2026-09-11
 ------|--------|----------|
 | 场景(`.tscn`) | 该场景的根脚本 | 改场景树结构先动 `.tscn`,再动脚本 |
 | 资源(`.tres`) | 数据的 Resource 类 | 数据驱动,代码不持有常量数值 |

@@ -1,7 +1,7 @@
 ---
 name: level-data-flow
 description: "设计、修改或扩展 2D 关卡时的使用,或当用户说"改关卡"/"加关"/"调整难度"。把 GDD 设计意图桥接到 Godot 场景/资源:关卡数据作为 .tres 或 JSON、场景由数据组合、确定性加载。"
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [design-to-data | data-to-scene | tune-balance] -->
@@ -63,7 +63,8 @@ class_name LevelLayout extends Resource
 @export var time_limit_sec: float = 0.0  # 0 = 无限制
 
 class EntitySpawn extends Resource:
-    @export var type: StringName  # "enemy_slime" / "coin" / "spike"
+    @export var type: StringName  # 实体类型 key,从全局 EntityRegistry 查表
+    @export var entity_scene: PackedScene  # 可选,优先用;否则查 EntityRegistry
     @export var position: Vector2i
     @export var rotation: float = 0.0
     @export var data: Dictionary = {}  # 类型专属参数
@@ -94,13 +95,55 @@ func build(layout: LevelLayout) -> void:
         child.queue_free()
     # 玩家
     $Player.global_position = Vector2(layout.player_spawn) * layout.tile_size
-    # 实体
+    # 实体:优先用 EntitySpawn.entity_scene,否则从 EntityRegistry 查表
     for e in layout.entities:
-        var node := preload("res://scenes/entities/%s.tscn" % e.type).instantiate()
+        var scene: PackedScene = e.entity_scene if e.entity_scene else EntityRegistry.get(e.type)
+        if scene == null:
+            push_warning("Unknown entity type: %s" % e.type)
+            continue
+        var node := scene.instantiate()
         node.global_position = Vector2(e.position) * layout.tile_size
         for k in e.data:
             node.set(k, e.data[k])
         add_child(node)
+```
+
+**EntityRegistry autoload**(强制注册表,杜绝字符串拼接路径):
+
+```gdscript
+# res://autoloads/entity_registry.gd
+extends Node
+
+var _scenes: Dictionary[StringName, PackedScene] = {}
+
+func register(type: StringName, scene: PackedScene) -> void:
+    _scenes[type] = scene
+
+func get(type: StringName) -> PackedScene:
+    return _scenes.get(type, null)
+
+func has(type: StringName) -> bool:
+    return type in _scenes
+```
+
+项目根 `project.godot` autoload 段:
+
+```ini
+[autoload]
+EntityRegistry="*res://autoloads/entity_registry.gd"
+```
+
+各实体在 `_ready` 注册:
+
+```gdscript
+# res://autoloads/entity_registry_init.gd 或 main.gd
+func _ready() -> void:
+    EntityRegistry.register(&"enemy_slime", preload("res://scenes/entities/enemy_slime.tscn"))
+    EntityRegistry.register(&"coin", preload("res://scenes/entities/coin.tscn"))
+    EntityRegistry.register(&"spike", preload("res://scenes/entities/spike.tscn"))
+```
+
+**为什么用注册表**:与 `godot-gdscript-patterns` 第 9 节"preload vs load"保持一致——避免运行时字符串拼接路径(错路径运行时报错,IDE 抓不到);所有实体 `preload` 在解析时加载,重命名后 UID 自动更新。
     # 检查点
     for cp in layout.checkpoints:
         var node := preload("res://scenes/checkpoint.tscn").instantiate()
@@ -115,7 +158,7 @@ func build(layout: LevelLayout) -> void:
 ### 5.2 何时手摆 vs 程序化
 
 | 情况 | 推荐 |
-|last_reviewed: 2026-09-10
+|last_reviewed: 2026-09-11
 ------|------|
 | 简单静态关卡(≤ 20 实体) | 编辑器手摆,无需数据层 |
 | 复杂关卡 / 关卡多 | 数据 + 程序化 |
