@@ -1,6 +1,6 @@
 ---
 name: gdd-author
-description: "撰写 GDD(游戏设计文档):按规模自适应 Game jam / Solo / Team 三档模板。当用户提到"GDD"、"核心循环"、"玩法机制"、"设计支柱"等时使用。"
+description: 撰写 GDD(游戏设计文档):按规模自适应 Game jam / Solo / Team 三档模板。当用户提到「GDD」、「核心循环」、「玩法机制」、「设计支柱」等时使用。
 last_reviewed: 2026-09-10
 ---
 
@@ -8,7 +8,7 @@ last_reviewed: 2026-09-10
 
 # GDD 作者
 
-游戏设计文档（Game Design Document, GDD）撰写。从一句话创意到完整 GDD, 按规模自适应输出 Game jam / Solo / Team 三档模板, 文档自动落到 Obsidian 灵感库。
+游戏设计文档（Game Design Document, GDD）撰写。从一句话创意到完整 GDD, 按规模自适应输出 Game jam / Solo / Team 三档模板, 文档默认落到项目 `design/<游戏名>/` 目录。
 
 ## 1. 触发路由 (Phase 0)
 
@@ -17,8 +17,7 @@ last_reviewed: 2026-09-10
 ### 1.1 请求类型 (7 类)
 
 | 选项 | 含义 | 主走阶段 |
-|last_reviewed: 2026-09-10
----|---|---|
+|---|---|---|
 | A. 概念设计 | 有想法但还没成文 | 1 Vision |
 | B. 玩法 / 机制 | 已有 GDD, 细化机制 | 2 Mechanics |
 | C. 叙事 / 世界观 | 已有 GDD, 补故事 | 3 Content |
@@ -93,7 +92,7 @@ last_reviewed: 2026-09-10
 
 1. 渲染主文档, 含 YAML frontmatter (`title / type / version / synced / status / tags`, 6 字段必填)
 2. 决定是否拆子模块: **≥ 3 个内容子主题** → 拆目录 (`02-xxx/`, `03-xxx/`...); 否则单文件
-3. 写入 `<Obsidian>/输出/灵感库/<游戏名>/00-主设计文档.md` (或用户指定目录)
+3. 写入项目内 `design/<游戏名>/00-主设计文档.md` (用户显式指定其他路径时优先用户路径; 若用户使用 Obsidian 等外部笔记库, 再写到其指定目录)
 4. **handoff** — 显式告诉用户下一步:
    > "GDD 已完成。下一步: 调 `game-writing-plans` 把 §2 核心机制拆成 5-15 分钟任务;关卡/数表调到 `level-data-flow` 把 §3 内容落成 .tres;实现层走 `godot-coding-2d`。"
 5. 提示用户: "这是 living document, 改设计时同步回这里。"
@@ -171,6 +170,6 @@ gdd-author (设计层)
 ## 8. 状态与并发
 
 - **无运行时状态**: skill 是 procedural, 每次调用基于用户当前输入 + 已落盘文档。
-- **不写 session 之外的文件**: 落盘只写当前游戏的 GDD 目录, 不动 Obsidian 中其他游戏, 不动 `godot-connector` Codex 插件其他 skill。
-- **多人协作**: skill 自身不解决, 留待 Obsidian Git 插件或用户自行管理。
+- **不写 session 之外的文件**: 落盘只写当前游戏的 `design/<游戏名>/` 目录, 不动项目外笔记库或其他技能产物。
+- **多人协作**: skill 自身不解决, 留待用户 git/笔记同步工具自行管理。
 - **恢复**: 落盘前不写临时文件, 中断即放弃; 已落盘文档可被用户任意修订, 再次调用时只 diff "用户修改 vs 模板默认", 不重写用户已改节。

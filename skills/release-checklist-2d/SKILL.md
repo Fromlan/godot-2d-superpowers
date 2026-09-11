@@ -1,6 +1,6 @@
 ---
 name: release-checklist-2d
-description: "Use when user is about to release/build a 2D Godot game, or says "导出" / "打包" / "release version". 平台特定清单(Windows/Mac/Linux/Web/Android)、版本号、changelog、build 产物、发布后冒烟测试。"
+description: Use when user is about to release/build a 2D Godot game, or says 「导出」 / 「打包」 / 「release version」. 平台特定清单(Windows/Mac/Linux/Web/Android)、版本号、changelog、build 产物、发布后冒烟测试。
 last_reviewed: 2026-09-10
 ---
 

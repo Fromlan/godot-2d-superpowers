@@ -1,6 +1,6 @@
 ---
 name: level-data-flow
-description: "设计、修改或扩展 2D 关卡时的使用,或当用户说"改关卡"/"加关"/"调整难度"。把 GDD 设计意图桥接到 Godot 场景/资源:关卡数据作为 .tres 或 JSON、场景由数据组合、确定性加载。"
+description: 设计、修改或扩展 2D 关卡时的使用,或当用户说「改关卡」/「加关」/「调整难度」。把 GDD 设计意图桥接到 Godot 场景/资源:关卡数据作为 .tres 或 JSON、场景由数据组合、确定性加载。
 last_reviewed: 2026-09-11
 ---
 
@@ -97,7 +97,7 @@ func build(layout: LevelLayout) -> void:
     $Player.global_position = Vector2(layout.player_spawn) * layout.tile_size
     # 实体:优先用 EntitySpawn.entity_scene,否则从 EntityRegistry 查表
     for e in layout.entities:
-        var scene: PackedScene = e.entity_scene if e.entity_scene else EntityRegistry.get(e.type)
+        var scene: PackedScene = e.entity_scene if e.entity_scene else EntityRegistry.get_scene(e.type)
         if scene == null:
             push_warning("Unknown entity type: %s" % e.type)
             continue
@@ -106,9 +106,20 @@ func build(layout: LevelLayout) -> void:
         for k in e.data:
             node.set(k, e.data[k])
         add_child(node)
+    # 检查点
+    for cp in layout.checkpoints:
+        var cp_node := preload("res://scenes/checkpoint.tscn").instantiate()
+        cp_node.global_position = Vector2(cp) * layout.tile_size
+        add_child(cp_node)
+    # 音乐
+    if layout.music:
+        $Music.stream = layout.music
+        $Music.play()
 ```
 
 **EntityRegistry autoload**(强制注册表,杜绝字符串拼接路径):
+
+> 方法名用 `get_scene` 而不是 `get`——`Object.get()` 是引擎内置方法,子类再定义 `get` 会遮蔽并造成难以排查的调用错误。
 
 ```gdscript
 # res://autoloads/entity_registry.gd
@@ -119,7 +130,7 @@ var _scenes: Dictionary[StringName, PackedScene] = {}
 func register(type: StringName, scene: PackedScene) -> void:
     _scenes[type] = scene
 
-func get(type: StringName) -> PackedScene:
+func get_scene(type: StringName) -> PackedScene:
     return _scenes.get(type, null)
 
 func has(type: StringName) -> bool:
@@ -144,22 +155,11 @@ func _ready() -> void:
 ```
 
 **为什么用注册表**:与 `godot-gdscript-patterns` 第 9 节"preload vs load"保持一致——避免运行时字符串拼接路径(错路径运行时报错,IDE 抓不到);所有实体 `preload` 在解析时加载,重命名后 UID 自动更新。
-    # 检查点
-    for cp in layout.checkpoints:
-        var node := preload("res://scenes/checkpoint.tscn").instantiate()
-        node.global_position = Vector2(cp) * layout.tile_size
-        add_child(node)
-    # 音乐
-    if layout.music:
-        $Music.stream = layout.music
-        $Music.play()
-```
 
 ### 5.2 何时手摆 vs 程序化
 
 | 情况 | 推荐 |
-|last_reviewed: 2026-09-11
-------|------|
+|------|------|
 | 简单静态关卡(≤ 20 实体) | 编辑器手摆,无需数据层 |
 | 复杂关卡 / 关卡多 | 数据 + 程序化 |
 | 调试中的单个关卡 | 先手摆,稳定后转数据 |

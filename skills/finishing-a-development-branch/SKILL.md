@@ -148,7 +148,7 @@ git branch -D <feature-branch>
 
 **对选项 1 和已确认的丢弃运行**。选项 2 和 3 始终保留 worktree。两个调用方都已切换到主仓库根目录 — worktree 删除必须从 worktree 外运行 — 并使用 Step 2 中捕获的 `GIT_DIR`/`GIT_COMMON`/`WORKTREE_PATH` 值,即目录切换前的值。
 
-**若 `GIT_DIR == GIT_COM`**:常规仓库,无可清理 worktree。完成。
+**若 `GIT_DIR == GIT_COMMON`**:常规仓库,无可清理 worktree。完成。
 
 **若 `WORKTREE_PATH` 在 `.worktrees/` 或 `worktrees/` 下**:superpowers 创建的 — 我们负责清理:
 

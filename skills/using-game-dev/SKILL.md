@@ -25,8 +25,7 @@ last_reviewed: 2026-09-11
 ## Decision Table (必须先查,再行动)
 
 | 用户输入特征 | 调用的技能 | 顺序 |
-|last_reviewed: 2026-09-11
---------------|------------|------|
+|--------------|------------|------|
 | "我想做一款..." / 想法/概念/无 GDD | `game-brainstorming` | 1 |
 | "帮我写 GDD" / "写设计文档" / "GDD review" | `gdd-author` | 1 |
 | "核心循环" / "原型" / "试一下感觉" / "playtest" | `prototype-loop` | 1 |

@@ -7,7 +7,12 @@
       - frontmatter contains: name, description, last_reviewed, <!-- argument-hint: ... -->
       - last_reviewed matches YYYY-MM-DD
       - description length <= 300 characters
+      - description "..." form has no nested double quotes (breaks YAML)
       - markdown links of the form references/<file>.md resolve to an existing file
+      - code fences (```) are balanced
+      - no |last_reviewed lines injected into markdown tables
+      - table separator lines keep a leading |
+      - no repo-root skills/... paths in prose (use ../ or bare skill name)
 
     Output is a one-line summary per skill. Exit 0 if all pass, 1 if any fail.
     Designed for Windows PowerShell; portable enough for POSIX pwsh.
@@ -103,6 +108,47 @@ foreach ($sf in $skillFiles) {
             if (-not (Test-Path -LiteralPath $refPath)) {
                 $issues += "broken link: references/$refName"
             }
+        }
+
+        # YAML description: forbid unescaped nested double quotes in "..." form
+        if ($fm -match '(?m)^description:\s*"') {
+            $descLine = ($fm -split "`n" | Where-Object { $_ -match '^description:\s*"' } | Select-Object -First 1)
+            if ($descLine) {
+                # Strip opening and trailing closing quotes; any remaining " is nested
+                $inner = $descLine -replace '^description:\s*"', ''
+                $inner = $inner -replace '"\s*$', ''
+                if ($inner -match '"') {
+                    $issues += "description has nested double quotes (breaks YAML); use 「」 or description: |"
+                }
+            }
+        }
+
+        # Balanced code fences (``` count must be even)
+        $fenceCount = ([regex]::Matches($content, '(?m)^```')).Count
+        if ($fenceCount % 2 -ne 0) {
+            $issues += "unbalanced code fences: $($fenceCount) opening/closing markers (odd)"
+        }
+
+        # Table corruption: last_reviewed injected into tables
+        if ($content -match '(?m)^\|last_reviewed:') {
+            $issues += "table corruption: |last_reviewed line inside markdown table"
+        }
+
+        # Table separator lines that lost leading pipe (e.g. ---|---|--- without leading |)
+        if ($content -match '(?m)^-{3,}(\|-{3,})+\|?\s*$') {
+            $issues += "table separator missing leading |"
+        }
+
+        # Cross-skill path that assumes repo-root from inside a skill body
+        # Allow only inside fenced code (subagent message templates) or with ../
+        $bodyAfterFm = $content
+        if ($fmMatch.Success) {
+            $bodyAfterFm = $content.Substring($fmMatch.Index + $fmMatch.Length)
+        }
+        # Strip fenced code blocks first
+        $bodyNoCode = [regex]::Replace($bodyAfterFm, '(?ms)^```.*?^```\s*', '')
+        if ($bodyNoCode -match '(?<![`"\w])skills/[a-z0-9-]+/') {
+            $issues += "repo-root relative path skills/... in prose (use ../<skill>/ or bare skill name)"
         }
     }
 

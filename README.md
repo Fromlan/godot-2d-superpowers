@@ -73,11 +73,11 @@ git clone https://github.com/Fromlan/godot-2d-superpowers.git
 
 `example-game/` 是一个最小可跑的 2D 平台跳跃:
 
-- 玩家移动 + 跳跃 + 收集物
+- 玩家移动 + 跳跃 + 收集物(含 coyote time / jump buffer 纯函数)
 - 一个简单敌人(巡逻 + 碰撞伤害)
-- 主菜单 + 游戏场景 + 死亡重开
-- GUT 测试覆盖逻辑层(状态机 / 伤害公式)
-- `scripts/run-tests.ps1` 一键验证
+- HUD(HP / 分数 / 重开)+ GameManager autoload
+- GUT 测试覆盖逻辑层(伤害公式 / 玩家运动纯函数)
+- `scripts/run-tests.ps1` 一键验证(需先安装 GUT,见 example-game/README.md)
 
 ## 文档
 

@@ -1,6 +1,6 @@
 ---
 name: prototype-loop
-description: "当用户已批准 GDD 的核心循环,想在全面实现前验证"手感",或说"原型"/"试一下感觉"/"playtest this"时使用。Godot 2D 专项:极简场景、极简美术、脚本驱动验证、时间盒迭代。"
+description: 当用户已批准 GDD 的核心循环,想在全面实现前验证「手感」,或说「原型」/「试一下感觉」/「playtest this」时使用。Godot 2D 专项:极简场景、极简美术、脚本驱动验证、时间盒迭代。
 last_reviewed: 2026-09-11
 ---
 
@@ -94,8 +94,7 @@ last_reviewed: 2026-09-11
 ### Step 5 — 决策(三选一)
 
 | 结果 | 动作 |
-|last_reviewed: 2026-09-11
-------|------|
+|------|------|
 | **A. 通过** | 把数值带进 `game-writing-plans`,原型代码扔掉 |
 | **B. 局部调** | 改 `NOTES.md` 的"单一变量",再做 1 个原型(共 ≤ 2 个) |
 | **C. 失败** | 回 `game-brainstorming` 重审核心循环,或回 `gdd-author` 改机制 |

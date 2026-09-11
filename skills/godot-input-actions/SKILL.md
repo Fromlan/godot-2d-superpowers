@@ -33,8 +33,7 @@ func _unhandled_input(event: InputEvent) -> void:
 ## 2. `is_action_pressed` vs `is_action_just_pressed` vs `is_action_just_released`
 
 | API | 行为 | 用途 |
-|last_reviewed: 2026-09-10
----|---|---|
+|---|---|---|
 | `is_action_pressed(action)` | action 按住期间每帧 true | 持续(按住):行走、奔跑、视角转动 |
 | `is_action_just_pressed(action)` | 仅在按下状态变化的当帧 true | 边缘:跳跃、攻击、确认 |
 | `is_action_just_released(action)` | 仅在松开瞬间 true | 边缘:投雷、取消动作 |
@@ -133,8 +132,7 @@ Input.get_joy_axis(0, JOY_AXIS_LEFT_X)
 ## 6. 默认 InputMap actions
 
 | Action | Default binding | 用途 |
-|last_reviewed: 2026-09-10
----|---|---|
+|---|---|---|
 | `ui_accept` | Enter / Space | 确认 |
 | `ui_select` | Enter / Space | 选中(主要用于 ItemList/Tree) |
 | `ui_cancel` | Escape | 取消 |

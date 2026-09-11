@@ -1,6 +1,6 @@
 ---
 name: game-writing-plans
-description: "当 GDD 已批准,用户想开始实现,或说"写计划"/"拆任务"/"开始开发"时使用。Godot 2D 专项:5-15 分钟任务粒度,每任务的显式场景/脚本/资产分类,含子代理派发规则。"
+description: 当 GDD 已批准,用户想开始实现,或说「写计划」/「拆任务」/「开始开发」时使用。Godot 2D 专项:5-15 分钟任务粒度,每任务的显式场景/脚本/资产分类,含子代理派发规则。
 last_reviewed: 2026-09-11
 ---
 
@@ -14,8 +14,7 @@ last_reviewed: 2026-09-11
 ## 0. 路由(单题)
 
 | 选项 | 含义 | 主走 |
-|last_reviewed: 2026-09-11
-------|------|------|
+|------|------|------|
 | **A. 从 GDD 拆** | GDD 已批准,从头拆实现 | 走完整流程 |
 | **B. 加新功能** | 已有项目,加一个 feature | 走精简版,只拆该 feature |
 | **C. 修一批 bug** | `systematic-debugging-2d` 出的多个根因 | 走精简版,按根因拆 |
@@ -157,4 +156,4 @@ T<id>: <任务名>
 - 计划完成 → `godot-coding-2d` 逐任务执行
 - 执行过程用 git worktree 隔离
 - 每批任务完成 → `game-code-review`
-- **若来自 prototype-loop**:T1 任务的"参数"字段从 `prototype/NOTES.md` 抽取,规则见 `skills/prototype-loop/references/prototype-to-plan-handoff.md`
+- **若来自 prototype-loop**:T1 任务的"参数"字段从 `prototype/NOTES.md` 抽取,规则见 `../prototype-loop/references/prototype-to-plan-handoff.md`
