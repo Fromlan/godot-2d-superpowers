@@ -34,7 +34,7 @@
 
 - 仓库根:本文件所在目录
 - 技能目录:`skills/<skill-name>/SKILL.md`
-- 样例项目:`example-game/`(可作为模板复制)
+- 样例项目:`example-game/`(可作为模板复制;内含面向游戏项目的 `AGENTS.md`,与本文件职责不同)
 - 辅助脚本:`scripts/`(Windows PowerShell)
 - 文档:`docs/`
 

@@ -38,9 +38,11 @@ last_reviewed: 2026-09-11
 
 **禁止**靠"我记着"写代码 — 规范会演进,以 SKILL.md 为准。
 
-### 1.1 子代理派发时的强制(当通过 Codex `multi_agent_v1__spawn_agent` 派子任务时)
+### 1.1 子代理派发时的强制(宿主任意 spawn/subagent)
 
 子代理有**独立上下文**,父代理的"先读"指令不会自动带入。`using-game-dev` 的强制约束只对父 agent 生效,不能直接传导到子代理。
+
+无论宿主是 Codex `multi_agent_v1__spawn_agent`、MiMo `actor` spawn、Claude Code Agent,还是其他 subagent,**message 模板相同**。工具名不同不要跳过本节。
 
 **message 模板**(严格按此构造,不得省略):
 
@@ -126,6 +128,7 @@ Using godot-coding-2d to write HP bar with damage flash. 上游必读: skills/go
 - ❌ 先写实现再补测试
 - ❌ "我觉得这个函数太简单不用测" → 简单 = 好测,必须测
 - ❌ 跳过 RED 直接 GREEN → 等于没 TDD
+- ❌ **GUT 未安装时假装测试已跑** → 先声明缺依赖;至少 `godot --headless --quit` 验证脚本可解析,并在回复中写明「逻辑层测试未执行」
 
 ### 7.2 装配层(集成测试,推荐)
 

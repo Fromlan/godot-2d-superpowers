@@ -1,7 +1,7 @@
 ---
 name: game-brainstorming
 description: Use when user wants to make a 2D Godot game, has a vague idea, says "我想做一款...", or wants to explore a game concept before committing to a GDD. Socratic design refinement specific to 2D game design pillars and core loops.
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [from-scratch | refine | pivot] -->
@@ -13,7 +13,7 @@ last_reviewed: 2026-09-10
 
 ## 0. 路由(进入技能先问)
 
-用 `ask_user` **单题 ≤ 4 选 1** 让用户选:
+用宿主**选项工具**(`question` / `ask_user` / 等价;见 `using-game-dev` §宿主中立约定)**单题 ≤ 4 选 1** 让用户选;无选项工具则列出 A/B/C 编号并等待用户回复,禁止替用户选:
 
 | 选项 | 含义 | 走法 |
 |------|------|------|

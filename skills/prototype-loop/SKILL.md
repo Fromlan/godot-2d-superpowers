@@ -14,16 +14,25 @@ last_reviewed: 2026-09-11
 ## 0. 何时用 / 何时不用
 
 **用**:
-- GDD 已批准,核心循环已定
-- 想验证"跳跃手感"、"射击节奏"、"战斗循环"
-- 不确定某机制是否好玩(代价低,先验证再写 GDD)
+- GDD 已批准,核心循环已定,想验证「跳跃手感」「射击节奏」「战斗循环」
+- **GDD 前**:不确定机制是否好玩(低代价验证,结论回填概念包 / GDD Phase 2)
 - A/B 候选机制对比
 
 **不用**:
-- 还没 GDD → 先 `game-brainstorming` / `gdd-author`
+- 连 hook / 核心动作都没想清 → 先 `game-brainstorming`(拿概念包),再回来
 - 已经进入正式开发 → 直接 `game-writing-plans`
 - 美术/UI 验证 → 这不是循环验证,用 `asset-pipeline`
 - 原型关卡用程序化几何(ColorRect / StaticBody2D / CollisionShape2D),**不写 LevelLayout、`.tres`、`@export var data: Resource`** — 这些都属 `level-data-flow` 正式开发范畴
+
+### 0.1 两条合法时序(必须选一并写进 NOTES.md)
+
+| 路径 | 前置 | 产物 | 下一步 |
+|------|------|------|--------|
+| **A. GDD 后**(默认) | 概念包 + GDD 核心循环已批准 | `prototype.tscn` + 调参值 | 通过 → `game-writing-plans`(只迁参数) |
+| **B. GDD 前**(允许) | 概念包已有 hook + 候选机制;**可以还没有正式 GDD** | 同上 + 「结论」段 | 通过 → 回填 `gdd-author`(Phase 2 机制行)再写正式 GDD;失败 → 回 `game-brainstorming` |
+
+**禁止**在「连概念包都没有」时直接开原型——先 hook。  
+**禁止**把路径 B 的结论写成「我感觉不错」——必须是可回填机制表的输入/响应/失败态/反馈。
 
 ## 1. 原则(必须遵守)
 
@@ -42,6 +51,9 @@ last_reviewed: 2026-09-11
 ```markdown
 # 原型: <机制名>
 
+## 时序路径
+- [ ] A. GDD 后验证  /  [ ] B. GDD 前探路
+
 ## 验证的问题
 - 这手感对吗?
 - 这节奏玩家会腻吗?
@@ -59,6 +71,12 @@ last_reviewed: 2026-09-11
 ## 时间盒
 - 开始: __:__
 - 截止: __:__ (≤ 2 小时)
+
+## (路径 B 才填)回填 GDD 的机制行
+- 输入: ...
+- 系统响应: ...
+- 失败态: ...
+- UI 反馈: ...
 ```
 
 ### Step 2 — 最小场景
@@ -95,9 +113,10 @@ last_reviewed: 2026-09-11
 
 | 结果 | 动作 |
 |------|------|
-| **A. 通过** | 把数值带进 `game-writing-plans`,原型代码扔掉 |
+| **A. 通过**(路径 A) | 把数值带进 `game-writing-plans`,原型代码扔掉 |
+| **A. 通过**(路径 B) | 把机制行回填 `gdd-author`,GDD 批准后再 `game-writing-plans` |
 | **B. 局部调** | 改 `NOTES.md` 的"单一变量",再做 1 个原型(共 ≤ 2 个) |
-| **C. 失败** | 回 `game-brainstorming` 重审核心循环,或回 `gdd-author` 改机制 |
+| **C. 失败** | 路径 A → 回 `gdd-author` 改机制;路径 B → 回 `game-brainstorming` 重审 hook/循环 |
 
 **关键**:不要带"先做了再说"心态进正式项目。每个原型都是**可丢弃**的。
 
@@ -128,6 +147,9 @@ last_reviewed: 2026-09-11
 3. prototype **代码全部留在 `prototype/` 目录,不复制到正式项目**(只迁"参数",不迁代码)
 4. 跳 `game-code-review`(prototype 是"丑但能跑",非正式交付,不走审查)
 
+**路径 B 追加**:
+5. 将 NOTES「回填 GDD 的机制行」交给 `gdd-author`(按节修订 / 细化 Mechanics),**GDD 标记批准后**再进 `game-writing-plans`
+
 **失败 / 部分通过**:
-- 失败 → 回 `game-brainstorming` 或 `gdd-author`
+- 失败 → 路径 A 回 `gdd-author`;路径 B 回 `game-brainstorming`
 - 部分通过 → 决定保留哪些机制,删哪些,然后回到上面"通过"路径

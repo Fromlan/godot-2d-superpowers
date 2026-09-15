@@ -1,7 +1,7 @@
 ---
 name: gdd-author
 description: 撰写 GDD(游戏设计文档):按规模自适应 Game jam / Solo / Team 三档模板。当用户提到「GDD」、「核心循环」、「玩法机制」、「设计支柱」等时使用。
-last_reviewed: 2026-09-10
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [from-scratch | review | section-fix | scale-jam | scale-solo | scale-team] -->
@@ -12,7 +12,7 @@ last_reviewed: 2026-09-10
 
 ## 1. 触发路由 (Phase 0)
 
-进入 skill 后, 用 `ask_user` **单题 ≤ 4 选 1** 让用户确认: ①请求类型 + ②规模档。**不堆 4 题**。
+进入 skill 后, 用宿主**选项工具**(`question` / `ask_user` / 等价;见 `using-game-dev` §宿主中立约定)**单题 ≤ 4 选 1** 让用户确认: ①请求类型 + ②规模档。**不堆 4 题**。无选项工具则列出编号等待用户回复,禁止替用户选。
 
 ### 1.1 请求类型 (7 类)
 
@@ -134,7 +134,7 @@ tags: [<genre>, <platform>, ...]
 | 描述用 "丰富细腻" 等空话 | 美术 / 世界章节 | 替换为参考图 / 色板 / 情绪词 3 选 1, 否则 TBD |
 | 用户问实现细节 (Godot 节点) | Phase 1–4 中混入 | 切 `godot-coding-2d` / `godot-gdscript-patterns` |
 | 输入超长 (已有 500 行 GDD) | 用户贴了完整稿 | **审计模式**: 不重写, 按本 skill 节号映射打勾, 输出 "差异清单" |
-| 用户没说游戏名 | Phase 0 | 占位 `<新游戏-001>`, 收尾前 ask_user 确认改名 |
+| 用户没说游戏名 | Phase 0 | 占位 `<新游戏-001>`, 收尾前用宿主选项工具确认改名 |
 | 已有项目要 "扩展 GDD" | 不是从零 | "按节修订" 子流程: 读现状, 只补缺节, 不重写已有节 |
 
 ## 5. 触发关键词 (frontmatter 内含)

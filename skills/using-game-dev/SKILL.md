@@ -22,6 +22,19 @@ last_reviewed: 2026-09-11
 
 然后公告 "Using [skill] to [purpose]" 并严格按技能执行。如有 checklist,每条建一个 todo。
 
+## 宿主中立约定(必须)
+
+本套件可在 Codex Desktop / Claude Code / MiMo Desktop 等宿主上运行。技能正文里的**产品专用工具名只作示意**,以本节约定为准:
+
+| 意图 | 做法(按当前宿主等价物) |
+|------|------------------------|
+| 向用户单题多选(≤ 4 选 1) | 用宿主的**选项卡/问答工具**(如 `question` / `ask_user` / 等价 UI);没有则在回复里列出编号选项并等待用户回复,禁止替用户擅自选 |
+| 派子代理执行子任务 | 用宿主的 spawn/actor/subagent 能力;**message 必须带上游必读技能路径**,见 `godot-coding-2d` §1.1 |
+| Shell | 优先**当前平台等价命令**(Windows 用 PowerShell;POSIX 用 bash);同一逻辑不要写死 bash-only |
+| Git 操作 | 用当前宿主可用的 git CLI;破坏性操作仍需用户显式确认 |
+
+技能里出现的 `ask_user`、`multi_agent_v1__spawn_agent` 等名称,若与当前宿主不一致,自动映射到等价工具,不要因工具名不同而跳过流程。
+
 ## Decision Table (必须先查,再行动)
 
 | 用户输入特征 | 调用的技能 | 顺序 |
@@ -30,7 +43,8 @@ last_reviewed: 2026-09-11
 | "帮我写 GDD" / "写设计文档" / "GDD review" | `gdd-author` | 1 |
 | "核心循环" / "原型" / "试一下感觉" / "playtest" | `prototype-loop` | 1 |
 | | 通过 → `game-writing-plans`(中间不走 `game-code-review`) | — |
-| GDD 已批准,开始开发 / "实现 X" | `game-writing-plans` → `godot-coding-2d` | 1→2 |
+| GDD 已批准,开始开发 / "实现 X"(≥ 2 任务或新建系统) | `game-writing-plans` → `godot-coding-2d` | 1→2 |
+| **极小改动**:修一行 / 调一个参数 / 换一张图 / 改 InputMap 单项 / 热修 | `game-writing-plans`(`from-hotfix` 精简档) → `godot-coding-2d` | 1→2 |
 | 添加素材 / 换图片 / 改音效 / 字体 / 动画 | `asset-pipeline` | 1 |
 | 改关卡 / 加关 / 章节数据 | `level-data-flow` | 1 |
 | 报 bug / 现象是... / 性能差 / 帧率低 | `systematic-debugging-2d` | 1 |
@@ -44,8 +58,18 @@ last_reviewed: 2026-09-11
 | GDScript 风格/静态类型/Resource/信号 | `godot-gdscript-patterns` | 1 |
 | InputMap/Action/手柄/快捷键 | `godot-input-actions` | 1 |
 | UI/Control/CanvasLayer/布局 | `godot-ui-best-practices` | 1 |
-| 查不到 | 列出 2-3 个最可能命中的候选,问用户选哪个 | — |
+| 查不到 | 列出 2-3 个最可能命中的候选,用宿主选项工具问用户 | — |
 | 输入明显是 3D / 非 Godot 项目 | **主动告知用户本套件不适用**,问是否继续 | — |
+
+### 极小改动 vs 正式任务(判定)
+
+| 特征 | 走法 |
+|------|------|
+| 影响 1–2 个文件、无新系统、验证可用「启动 + 单测/手测」一句话说完 | `game-writing-plans` **`from-hotfix`**:产出 1 条任务即可,模板从简 |
+| 新建场景树/多文件协作/跨系统/预计 > 15 分钟 | 完整 `from-gdd` / `from-feature` 计划 |
+| 只报现象、根因未定位 | 仍先 `systematic-debugging-2d`,不要用 hotfix 代替调试 |
+
+禁止以「这次简单」为由**跳过** planning;允许用 hotfix **缩短** planning。
 
 ## Skill Priority (组合调用顺序)
 
@@ -58,6 +82,7 @@ last_reviewed: 2026-09-11
 - "我想做一款平台跳跃,跳跃手感不对" → `game-brainstorming`(先确认设计)→ `systematic-debugging-2d`(查手感问题)→ `godot-2d-physics`(给具体技术)
 - "加一个跳跃音效" → `asset-pipeline`(资源命名/导入)→ `godot-audio`(AudioStreamPlayer 用法)
 - "给敌人写个 AI" → `gdd-author`(若有 AI 规则)→ `game-writing-plans`(拆任务)→ `godot-coding-2d`(TDD 状态机)
+- "把跳跃初速从 380 改成 400" → `game-writing-plans`(`from-hotfix`)→ `godot-coding-2d`(改常量 + 跑测)
 
 ## Red Flags (这些想法 = 你在给自己找借口)
 
@@ -68,8 +93,9 @@ last_reviewed: 2026-09-11
 | "GDScript 我懂,直接写" | 知识技能 `godot-gdscript-patterns` 里有项目约定的具体规范,先读它 |
 | "我先把整个项目扫一遍" | `game-brainstorming` 决定是否值得扫,先调它 |
 | "用户没说要测试" | 流程类技能里有"何时必须测试"的检查点,不是用户决定的 |
-| "这次跳过计划,简单任务" | 写计划可以很短(1 个任务),但不能跳过 |
+| "这次跳过计划,简单任务" | 极小改动走 `from-hotfix`(1 任务),不能跳过 planning |
 | "我先把 GDD 写完再调技能" | `gdd-author` **就是**技能,先调它 |
+| "宿主没有 ask_user,我直接自己选" | 用等价选项工具或列出编号等用户回,禁止替用户决策 |
 
 ## Process vs Knowledge (再次强调)
 
@@ -85,6 +111,8 @@ User instructions (CLAUDE.md, AGENTS.md, 直接请求) > skills > default behavi
 ## Subagent Dispatch
 
 如果你是作为子代理被派发执行特定任务,可以跳过 `using-game-dev` 查询 — 前提是父代理已经把你路由到具体技能。否则仍查决策表。
+
+父代理派发时,子 message **必须**包含:目的 + 必读技能路径 + 禁止绕过先读(见 `godot-coding-2d` §1.1)。父代理自身的「我会先读」不会自动传给子代理。
 
 ## Scope (作用域)
 

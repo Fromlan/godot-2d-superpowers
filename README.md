@@ -49,8 +49,15 @@
 
 ```bash
 git clone https://github.com/Fromlan/godot-2d-superpowers.git
-# 然后把仓库根的 AGENTS.md 软链接/复制到你的 Godot 项目里
 ```
+
+从模板起新游戏时:
+
+1. 复制整个 `example-game/` 到你的 Godot 项目(含其中的 **`AGENTS.md`**)
+2. 按该文件改写「本项目」与关键约定
+3. 技能包用插件安装,或让 agent 能读到本仓库的 `skills/`
+
+注意:**不要**把仓库根的 `AGENTS.md` 复制到游戏项目——那是开发本技能套件用的调度说明;游戏项目应使用 `example-game/AGENTS.md`。
 
 ## 典型操作流程
 

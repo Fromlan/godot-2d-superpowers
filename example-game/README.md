@@ -56,13 +56,18 @@ git clone https://github.com/bitwes/Gut.git gut
 
 Then enable in project.godot or via Plugins panel.
 
+**Without GUT**: agents must say the dependency is missing and must not claim tests passed. Use `godot --headless --quit` only as a parse/startup smoke check.
+
 ## What to do with this example
 
 1. **Read it top-to-bottom**: scripts are heavily commented, walk through player.gd first
-2. **Tweak numbers**: open player.tscn, change `max_speed` or `jump_velocity` in inspector, re-run
-3. **Add a level**: see `skill:level-data-flow` — add a `LevelLayout` resource + level_builder.gd
-4. **Add art**: drop sprites in `assets/sprites/`, follow `skill:asset-pipeline`
-5. **Add a feature**: walk through `game-brainstorming` → `gdd-author` → `game-writing-plans` → `godot-coding-2d`
+2. **Copy as a template**: take this whole folder (including `AGENTS.md`) into your game project; rewrite the project table and conventions in `AGENTS.md` for your game
+3. **Tweak numbers**: open player.tscn, change `max_speed` or `jump_velocity` in inspector, re-run
+4. **Add a level**: see `skill:level-data-flow` — add a `LevelLayout` resource + level_builder.gd
+5. **Add art**: drop sprites in `assets/sprites/`, follow `skill:asset-pipeline`
+6. **Add a feature**: walk through `game-brainstorming` → `gdd-author` → `game-writing-plans` → `godot-coding-2d`
+
+`AGENTS.md` here is the **consumer project** entry (light dispatch + project conventions). The repo-root `AGENTS.md` is only for developing this skill suite—do not copy that one into your game.
 
 ## Skill mapping
 

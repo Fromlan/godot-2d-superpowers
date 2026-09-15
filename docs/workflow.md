@@ -38,8 +38,9 @@
 |------|------------|
 | "我想做一款..." | game-brainstorming |
 | "帮我写 GDD" | gdd-author |
-| "核心循环" / "原型" | prototype-loop |
+| "核心循环" / "原型" | prototype-loop(支持 GDD 前路径 B / GDD 后路径 A) |
 | GDD 已批准 | game-writing-plans → godot-coding-2d |
+| 极小改动 / 热修 | game-writing-plans(`from-hotfix`)→ godot-coding-2d |
 | 添加素材 | asset-pipeline |
 | 改关卡 | level-data-flow |
 | 报 bug | systematic-debugging-2d |
@@ -92,12 +93,19 @@
 1. `release-checklist-2d`(全流程)
 2. `finishing-a-development-branch`(如果还没合)
 
+### 我只想改一行 / 调一个参数
+
+1. `game-writing-plans`(`from-hotfix`:单任务短模板,**不跳过**)
+2. `godot-coding-2d` 执行 + 对应层级验证
+3. 根因未清的 bug 仍先 `systematic-debugging-2d`,不要用 hotfix 代替调试
+
 ## 反模式(流程层面)
 
 - ❌ 跳过 brainstorming 直接写代码 → 核心循环跑偏,沉没成本
 - ❌ 跳过 GDD 直接实现 → 范围漂移
 - ❌ 跳过 prototype 直接写"完整版" → 手感不对回头重写
-- ❌ 跳过 writing-plans 直接干 → 子代理乱飞
+- ❌ 跳过 writing-plans 直接干 → 子代理乱飞;极小改动应用 `from-hotfix` 而不是「跳过」
 - ❌ 跳过 review 直接合入 → 模式性问题反复出现
 - ❌ 出 bug 不走 systematic-debugging → 乱 try,浪费时间
 - ❌ 跳过 release checklist 直接打包 → 忘签名/忘 changelog
+- ❌ 宿主没有 `ask_user` 就替用户选 → 应用等价选项工具或编号等待

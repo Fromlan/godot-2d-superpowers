@@ -1,10 +1,10 @@
 ---
 name: game-writing-plans
-description: 当 GDD 已批准,用户想开始实现,或说「写计划」/「拆任务」/「开始开发」时使用。Godot 2D 专项:5-15 分钟任务粒度,每任务的显式场景/脚本/资产分类,含子代理派发规则。
+description: 当 GDD 已批准,用户想开始实现,或说「写计划」/「拆任务」/「开始开发」/ 极小改动热修时使用。Godot 2D 专项:5-15 分钟任务粒度;含 from-hotfix 单任务精简档;每任务的显式场景/脚本/资产分类与子代理派发规则。
 last_reviewed: 2026-09-11
 ---
 
-<!-- argument-hint: [from-gdd | from-feature | from-bug] -->
+<!-- argument-hint: [from-gdd | from-feature | from-bug | from-hotfix] -->
 
 # 游戏开发规划 (2D Godot)
 
@@ -18,6 +18,45 @@ last_reviewed: 2026-09-11
 | **A. 从 GDD 拆** | GDD 已批准,从头拆实现 | 走完整流程 |
 | **B. 加新功能** | 已有项目,加一个 feature | 走精简版,只拆该 feature |
 | **C. 修一批 bug** | `systematic-debugging-2d` 出的多个根因 | 走精简版,按根因拆 |
+| **D. from-hotfix** | 极小改动(见 §0.1),**1 条任务** | 走 hotfix 模板,仍禁止跳过本技能 |
+
+用宿主选项工具单题 ≤ 4 选 1(`using-game-dev` §宿主中立约定)。
+
+### 0.1 from-hotfix 精简档(何时用)
+
+**适用**(须同时满足):
+- 影响 **1–2 个文件**,无新建多节点场景树
+- 无新系统/无跨子系统接线
+- 验证可一句话说完(启动无错 / 一条 GUT / 一次手测)
+- 预计实现 **≤ 15 分钟**
+
+**不适用**(回 A/B/C 完整档):
+- 报 bug 且根因未定位 → 先 `systematic-debugging-2d`
+- 新建角色/关卡系统/存档/UI 骨架
+- 需要改 `project.godot` 多项(autoload、渲染、导出)除非用户已明确单项
+
+**Hotfix 计划模板**(`plans/hotfix-<slug>.md`,比 §1 短):
+
+```markdown
+# Hotfix: <一句话>
+
+## 元数据
+- 来源: <用户原话>
+- 风险: <低/中 + 一句话>
+- 类型: [ ] 脚本 [ ] 场景 [ ] 资源
+
+## T1. <任务名>(≤15m)
+**文件**:
+  - 改: `scripts/foo.gd` — `<具体符号/常量/行>`
+**步骤**:
+1. <一行改动说明>
+**验证**:
+- [ ] `scripts/run-tests.ps1`(或缺失 GUT 时: `godot --headless --quit` 无错)
+- [ ] 手测: <一句>
+**提交**: `git commit -m "T1: <任务名>"`
+```
+
+**禁止**把 hotfix 写成 3+ 任务清单;超了就升级到 `from-feature`。
 
 ## 1. 计划结构(强制模板)
 

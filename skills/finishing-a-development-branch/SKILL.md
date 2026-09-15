@@ -1,7 +1,7 @@
 ---
 name: finishing-a-development-branch
-description: "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work. 适用于 2D Godot 项目收尾;对非 Godot 项目或非游戏项目保留 superpowers 原英文版。"
-last_reviewed: 2026-09-10
+description: "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work. 适用于 2D Godot 项目收尾;宿主中立(POSIX/Windows 皆可)。"
+last_reviewed: 2026-09-11
 ---
 
 <!-- argument-hint: [merge | pr | keep | discard] -->
@@ -16,7 +16,17 @@ last_reviewed: 2026-09-10
 
 ## Step 1:验证测试
 
-跑项目完整测试套件(`npm test` / `cargo test` / `pytest` / `go test ./...` / Godot 项目 `scripts/run-tests.ps1` + `scripts/headless-smoke.ps1`)。
+跑项目完整测试套件:
+
+| 项目类型 | 命令 |
+|----------|------|
+| **2D Godot(本套件默认)** | Windows: `.\scripts\run-tests.ps1` + `.\scripts\headless-smoke.ps1`;POSIX: `pwsh ./scripts/run-tests.ps1` 或等价 |
+| Node | `npm test` |
+| Rust | `cargo test` |
+| Python | `pytest` |
+| Go | `go test ./...` |
+
+**缺依赖时**(如未装 GUT):报告缺失,禁止假装测试通过;与 `example-game/AGENTS.md` 一致。
 
 **若测试失败**,报告失败并停下 — 菜单在绿色套件之后才出现:
 
@@ -30,12 +40,24 @@ last_reviewed: 2026-09-10
 
 ## Step 2:检测环境
 
+**POSIX (bash/zsh)**:
+
 ```bash
 GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
 GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
 # 现在捕获,还在工作区里 — Step 5 切换目录前(Step 6 清理)需要这个值
 WORKTREE_PATH=$(git rev-parse --show-toplevel)
 ```
+
+**Windows (PowerShell)**:
+
+```powershell
+$GIT_DIR = (Resolve-Path (git rev-parse --git-dir)).Path
+$GIT_COMMON = (Resolve-Path (git rev-parse --git-common-dir)).Path
+$WORKTREE_PATH = (git rev-parse --show-toplevel)
+```
+
+下文命令以 bash 为基准;PowerShell 将 `git ...` 调用原样使用,目录切换用 `Set-Location` / `cd`,比较路径用 `-eq`。
 
 这决定显示哪个菜单和怎么清理:
 
